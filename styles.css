@@ -186,3 +186,19 @@ header p {
     font-size: 1rem;
     color: #94a3b8;
 }
+
+.page-footer {
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.footer-textbox {
+    display: inline-block;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
