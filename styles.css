@@ -152,6 +152,14 @@ header p {
     margin-bottom: 1.25rem;
 }
 
+.subsection-heading {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
 .image-gallery {
     display: flex;
     gap: 1.5rem;
@@ -185,6 +193,24 @@ header p {
     margin-top: 0.75rem;
     font-size: 1rem;
     color: #94a3b8;
+    line-height: 1.45;
+    text-align: center;
+}
+
+.offset-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.75rem;
+    margin-bottom: 0.15rem;
+}
+
+.channel-g {
+    color: #22c55e;
+}
+
+.channel-r {
+    color: #ef4444;
 }
 
 .page-footer {
@@ -205,6 +231,7 @@ header p {
 
 .analysis-textbox {
     margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
     padding: 1.25rem 1.5rem;
     font-size: calc(1rem + 2pt);
     line-height: 1.7;
