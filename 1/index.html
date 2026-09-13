@@ -59,7 +59,13 @@
             </div>
 
             <p class="analysis-textbox">To fix this, I cropped the outermost 15 pixels on each side before calculating the
-                NCC. MORE HERE.
+                NCC. The reason NCC works so well to align the images is that we expect the different colorways of each image
+                to be bright or dark in the same places (on aggregate). Because we subtract the mean of each vector from each
+                of the elements, even if one colorway is much brighter than another on average, their dot products will be
+                close under NCC. The vectors are also normalized so that high-value pixels don't dominate the calculation.
+                Cropping the outermost pixels allows the similarity in pixel intensity to be measured over the part of the
+                image we care about without the outliers produced by the out of synch borders of the different colorways
+                affecting the final displacement.
             </p>
             <div class="image-gallery">
                 <figure class="gallery-item">
