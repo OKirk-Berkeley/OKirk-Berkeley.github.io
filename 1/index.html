@@ -16,7 +16,15 @@
             <h2 class="part-heading">Single Scale</h2>
 
             <h3 class="subsection-heading">First Attempt: NCC over the Whole Image.</h3>
-            <p class="analysis-textbox">Explanation coming soon.</p>
+            <p class="analysis-textbox">Images in this collection are digital scans of black-and-white exposures taken on 
+                glass plates taken using red, blue, and green filters. To align the different colorways of the image, I
+                matched the red and green colorways to the blue by exauhstively searching a 15 by 15 pixel displacement. To
+                determine how well each displacement fit, I used <b>Normalized Cross-Correlation (NCC)</b>. To do this, I
+                treated each image as a 1D vector, and subtracted its mean and normalized it. I then compared the dot
+                products of the two vectors. In my first attempt, I took the NCC over the whole image, including the
+                misaligned color boarders. These boarders overcontributed to the final calculated alignment, resulting
+                in these misaligned images.
+            </p>
             <div class="image-gallery">
                 <figure class="gallery-item">
                     <img src="./single-scale-cathedral1.jpg" alt="cathedral.jpg">
