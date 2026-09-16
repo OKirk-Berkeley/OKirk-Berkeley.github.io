@@ -58,7 +58,7 @@
                 </figure>
             </div>
 
-            <p class="analysis-textbox">To fix this, I cropped the outermost 15 pixels on each side before calculating the
+            <p class="analysis-textbox">To fix this, I cropped the outermost 10% of each side of an image before calculating the
                 NCC. The reason NCC works so well to align the images is that we expect the different colorways of each image
                 to be bright or dark in the same places (on aggregate). Because we subtract the mean of each vector from each
                 of the elements, even if one colorway is much brighter than another on average, their dot products will be
@@ -92,7 +92,7 @@
                     <img src="./single-scale-tobolsk2.jpg" alt="tobolsk.jpg">
                     <figcaption>
                         <span class="offset-line">
-                            <span class="channel-g">G: (2, 3)</span>
+                            <span class="channel-g">G: (3, 3)</span>
                             <span class="channel-r">R: (3, 6)</span>
                         </span>
                         tobolsk.jpg
@@ -103,9 +103,255 @@
 
         <section class="gallery-section">
             <h2 class="part-heading">Image Pyramid</h2>
+
+            <div class="analysis-textbox">
+            <p>For the larger .tif images, two problems presented themseleves. The first was that
+                the displacements needed to align each color were sometimes in the hundreds. The second was that because the images
+                were so much longer, all the calculations took much longer. These two facts combined made the exahustive search over
+                a small pixel range used earlier completley untennable.
+            </p>
+
+            <p>To solve this, I used <b>image pyramids</b>. The basic idea is to shrink the images to much smaller versions and
+                quickly calculate an estimate of the displacement needed to align the full-sized images by scaling up the displacement
+                needed to align the smaller images. Then, to progressivley refine that estimate by making the images progressivley larger
+                and exauhstively searching a very small area surrounding the estimated displacement. At each step, the estimate is refined.
+            </p>
+
+            <p>In more detail, I scaled the images down by halving both their width and height (being careful to use anti-aliasing)
+                until their minimum dimmension was less than or equal to 200 pixels. At this scale, I would exauhstively search a
+                15x15 pixel radius. This may not sound like much, but a 1 pixel shift at this scale is equal to a 2<sup>n</sup> pixel
+                shift in the original image (where n is the number of times the image was downsized). Since smaller images aren't
+                downsized as much, they end up searching a much smaller pixel displacement region than their larger counterparts, which
+                is perfect, as smaller images require smaller displacements to be properly aligned. In practice, the JPEG files were only
+                reduced once, so ended up searching the equivilent of a 30x30 pixel displacement at the smallest scale. The TIFF files
+                were shrunk 5 times, so ended up searching the equivilent of a 480x480 pixel dispalcement at the smallest scale. After
+                calculating these displacement estimates, the images were resized to one size larger and the estimates were refined by
+                searching a 2x2 pixel region centered at the previous dispalcement estimate. The highest scoring displacement was then used
+                as the estimate the next 2x2 search was centered around at the next size up. This process repeated until the final
+                displacement was calculated at the full image size.
+            </p>
+            </div>
+            <div class="image-gallery image-gallery--thirds">
+                <figure class="gallery-item">
+                    <img src="./multi-scale-cathedral.jpg" alt="cathedral.jpg">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (2, 5)</span>
+                            <span class="channel-r">R: (3, 12)</span>
+                        </span>
+                        cathedral.jpg
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-church.jpg" alt="church.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (4, 25)</span>
+                            <span class="channel-r">R: (-4, 58)</span>
+                        </span>
+                        church.tif
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-emir.jpg" alt="emir.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (24, 49)</span>
+                            <span class="channel-r">R: (-205, 141)</span>
+                        </span>
+                        emir.tif (see below)
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-harvesters.jpg" alt="harvesters.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (17, 60)</span>
+                            <span class="channel-r">R: (13, 124)</span>
+                        </span>
+                        harvesters.tif
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-icon.jpg" alt="icon.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (17, 41)</span>
+                            <span class="channel-r">R: (23, 89)</span>
+                        </span>
+                        icon.tif
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-ilemselga.jpg" alt="ilemselga.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (7, 40)</span>
+                            <span class="channel-r">R: (11, 130)</span>
+                        </span>
+                        ilemselga.tif
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-melons.jpg" alt="melons.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (11, 82)</span>
+                            <span class="channel-r">R: (13, 178)</span>
+                        </span>
+                        melons.tif
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-monastery.jpg" alt="monastery.jpg">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (2, -3)</span>
+                            <span class="channel-r">R: (2, 3)</span>
+                        </span>
+                        monastery.jpg
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-religous_painting.jpg" alt="religious_painting.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (3, 28)</span>
+                            <span class="channel-r">R: (7, 68)</span>
+                        </span>
+                        religious_painting.tif
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-self_portrait.jpg" alt="self_portrait.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (29, 79)</span>
+                            <span class="channel-r">R: (37, 168)</span>
+                        </span>
+                        self_portrait.tif
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-siren.jpg" alt="siren.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (-6, 49)</span>
+                            <span class="channel-r">R: (-25, 96)</span>
+                        </span>
+                        siren.tif
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-three_generations.jpg" alt="three_generations.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (14, 53)</span>
+                            <span class="channel-r">R: (11, 112)</span>
+                        </span>
+                        three_generations.tif
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-tobolsk.jpg" alt="tobolsk.jpg">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (3, 3)</span>
+                            <span class="channel-r">R: (3, 6)</span>
+                        </span>
+                        tobolsk.jpg
+                    </figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="./multi-scale-wharf.jpg" alt="wharf.tif">
+                    <figcaption>
+                        <span class="offset-line">
+                            <span class="channel-g">G: (-7, 15)</span>
+                            <span class="channel-r">R: (-16, 83)</span>
+                        </span>
+                        wharf.tif
+                    </figcaption>
+                </figure>
+            </div>
+
+            <h3 class="subsection-heading">My Images</h3>
+            <div class="comparison-group">
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./piony_plate.jpg" alt="piony_plate.jpg">
+                        <figcaption>piony plate</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./piony.jpg" alt="piony.tif">
+                        <figcaption>
+                            <span class="offset-line">
+                                <span class="channel-g">G: (21, 75)</span>
+                                <span class="channel-r">R: (30, 156)</span>
+                            </span>
+                            piony.tif
+                        </figcaption>
+                    </figure>
+                </div>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./ordezh_plate.jpg" alt="ordezh_plate.jpg">
+                        <figcaption>ordezh plate</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./ordezh.jpg" alt="ordezh.tif">
+                        <figcaption>
+                            <span class="offset-line">
+                                <span class="channel-g">G: (-1, 39)</span>
+                                <span class="channel-r">R: (-7, 151)</span>
+                            </span>
+                            ordezh.tif
+                        </figcaption>
+                    </figure>
+                </div>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./lynx_plate.jpg" alt="lynx_plate.jpg">
+                        <figcaption>lynx plate</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./lynx.jpg" alt="lynx.tif">
+                        <figcaption>
+                            <span class="offset-line">
+                                <span class="channel-g">G: (21, 59)</span>
+                                <span class="channel-r">R: (27, 130)</span>
+                            </span>
+                            lynx.tif
+                        </figcaption>
+                    </figure>
+                </div>
+            </div>
+
+            <h3 class="subsection-heading">The Emir Problem</h3>
+            <figure class="featured-image">
+                <img src="./multi-scale-emir.jpg" alt="Emir.tif">
+                <figcaption>
+                    <span class="offset-line">
+                        <span class="channel-g">G: (24, 49)</span>
+                        <span class="channel-r">R: (-205, 141)</span>
+                    </span>
+                    emir.tif
+                </figcaption>
+            </figure>
+            <p class="analysis-textbox">This algorithm was unable to successfully align the color chanels for this
+                photograph. Why? The algorithm is based on the assumption that the different color chanels will all
+                have similar values at the same point when they are properly aligned. An NCC score is, at its core, simply
+                a measure of how similar two images are. Because the Emir's robe appears so differently in each color chanel,
+                the proper alignment actually doesn't involve the different color chanels having the most similar brightness
+                value at every pixel. Since my algorithm assumes the correct alignment will be the one that matches the pixel-by-pixel
+                brightness values of each images the best, this is enough to cause my algorithm to fail. NCC protects against
+                different color chanels having different average brightness values by adjusting each image's average brightness
+                to 0 before comparing two images, but it can't protect against images with the same brightness value being
+                bright <i>in different places</i>.
+            </p>
         </section>
 
         <a class="back-link" href="../index.html">← Back to Portfolio</a>
     </div>
+    <script src="../lightbox.js"></script>
 </body>
 </html>
