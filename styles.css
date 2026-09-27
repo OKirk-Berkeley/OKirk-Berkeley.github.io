@@ -132,6 +132,16 @@ header p {
     max-width: 960px;
 }
 
+.project-page--wide {
+    max-width: 1320px;
+}
+
+.project-page--wide .comparison-gallery {
+    max-width: 912px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .project-page header {
     margin-bottom: 2rem;
 }
@@ -274,6 +284,10 @@ header p {
     margin-bottom: 0.15rem;
 }
 
+.caption-line {
+    display: block;
+}
+
 .channel-g {
     color: #22c55e;
 }
@@ -342,4 +356,110 @@ header p {
 
 div.analysis-textbox > p + p {
     margin-top: 1rem;
+}
+
+.gallery-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.gallery-rows > .analysis-textbox {
+    margin: 1rem 0 0;
+}
+
+.gallery-rows > .analysis-textbox:first-child {
+    margin-top: 0;
+}
+
+.image-text-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.image-text-row .gallery-item {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+}
+
+.image-text-row .analysis-textbox {
+    margin: 0;
+}
+
+@media (max-width: 700px) {
+    .image-text-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.code-box {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.code-box summary {
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+}
+
+.code-box summary::-webkit-details-marker {
+    display: none;
+}
+
+.code-box summary::before {
+    content: "▸";
+    display: inline-block;
+    margin-right: 0.6rem;
+    transition: transform 0.15s;
+}
+
+.code-box[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.code-box summary:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.text-dropdown {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+.text-dropdown-body {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(99, 102, 241, 0.4);
+    font-size: calc(1rem + 2pt);
+    line-height: 1.7;
+    color: #e2e8f0;
+}
+
+.text-dropdown-body p + p {
+    margin-top: 1rem;
+}
+
+.text-dropdown-body .image-gallery {
+    margin: 0.5rem 0 1.25rem;
+}
+
+.code-box pre {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #e2e8f0;
 }
