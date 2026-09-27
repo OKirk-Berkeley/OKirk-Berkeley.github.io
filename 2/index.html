@@ -7,11 +7,308 @@
     <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-    <div class="placeholder-page">
-        <div class="icon">🚧</div>
-        <h1>Oops, this project has not been implemented yet!</h1>
-        <p>Project 2 is still under construction. Check back soon!</p>
+    <div class="container project-page project-page--wide">
+        <header>
+            <h1>Project 2</h1>
+        </header>
+
+        <section class="gallery-section">
+            <h2 class="part-heading">Part 1</h2>
+
+            <h3 class="subsection-heading">Convolutions</h3>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">Convolutions are a building block of much of image processing. To begin
+                    this project, I implemented them from scratch. Below is the original version of my selfie, both
+                    in color and grayscale. The images that follow are the result of convolving the grayscale selfie
+                    with various kernels. Each image's caption shows the code used to generate that image. Relevant
+                    function definitions can be found at the bottom of this section.
+                </p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./self.jpg" alt="OG selfie (color)">
+                        <figcaption>OG selfie (color)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./self_gray.jpg" alt="OG selfie (gray)">
+                        <figcaption>OG selfie (gray)</figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">While these images all look the same, they were generated using different
+                code. All of them convolve the selfie with a 9x9 pixel box filter, but the first two were convolutions
+                implemented by me while the third was done using a standard library, SciPy. The first image was convolved
+                using four nested for loops and the second one using two. As the image processing times shown in each
+                image's caption show, reducing the nested for loops massively sped up the process. The library speeds it
+                up even more by utilizing vector operations to minimize the number of for loops even more.</p>
+                <div class="image-gallery image-gallery--thirds">
+                    <figure class="gallery-item">
+                        <img src="./selfie_4.jpg" alt="4 for loops">
+                        <figcaption>
+                            <span class="caption-line">convolve_four_for_loops(image, box_kernel(9))</span>
+                            <span class="caption-line">50.61 seconds</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./selfie_2.jpg" alt="2 for loops">
+                        <figcaption>
+                            <span class="caption-line">convolve_two_for_loops(image, box_kernel(9))</span>
+                            <span class="caption-line">8.28 seconds</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./selfie_scipy.jpg" alt="scipy">
+                        <figcaption>
+                            <span class="caption-line">signal.convolve2d(image, box_kernel(9), mode='same', boundary='fill', fillvalue=0)</span>
+                            <span class="caption-line">0.23 seconds</span>
+                        </figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">These images are also the result of convolving the selfie, though not with a box
+                    filter but rather a derivative filter. The first finds derivatives with respect to x and the second with
+                    respect to y. These "partial derivative" images locate vertivle and horizontal edges by taking on extreme
+                    values in places where nearby horizontal/verticle pixels have very different values. These derivative
+                    being very useful in computing the "gradient magnitude" (or "edge image"), as shown at the end.</p>
+                <div class="image-gallery image-gallery--thirds">
+                    <figure class="gallery-item">
+                        <img src="./selfie_dx.jpg" alt="dx">
+                        <figcaption>signal.convolve2d(image, np.array([[1, 0, -1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./selfie_dy.jpg" alt="dy">
+                        <figcaption>signal.convolve2d(image, np.array([[1], [0], [-1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./selfie_gm.jpg" alt="gm">
+                        <figcaption>Implementation discussed in next section</figcaption>
+                    </figure>
+                </div>
+            </div>
+
+            <details class="code-box">
+                <summary>convolve_four_for_loops</summary>
+                <pre><code>def convolve_four_for_loops(image, kernel):
+    padded_image = pad_image(image, kernel)
+    pad = (kernel.shape[0] - 1) // 2
+    #Repetative but helpful to give variable a different name when it has a different use
+    kernel_center = pad
+    output_image = np.empty((image.shape[0], image.shape[1]))
+    for x in range(output_image.shape[0]):
+        for y in range(output_image.shape[1]):
+            sum = 0
+            for xk in range(-pad, pad + 1):
+                for yk in range(-pad, pad + 1):
+                    im_value = padded_image[pad + x - xk, pad + y - yk]
+                    kern_value = kernel[kernel_center + xk, kernel_center + yk]
+                    sum += im_value * kern_value
+            output_image[x, y] = sum
+    return output_image
+</code></pre>
+            </details>
+
+            <details class="code-box">
+                <summary>convolve_two_for_loops</summary>
+                <pre><code>def convolve_two_for_loops(image, kernel):
+    kernel = kernel[::-1,::-1]
+    padded_image = pad_image(image, kernel)
+    pad = (kernel.shape[0] - 1) // 2
+    output_image = np.empty((image.shape[0], image.shape[1]))
+    for x in range(output_image.shape[0]):
+        for y in range(output_image.shape[1]):
+            relevant_slice = padded_image[x : x + 2 * pad + 1, y : y + 2 * pad + 1]
+            output_image[x, y] = np.sum(relevant_slice * kernel)
+    return output_image
+</code></pre>
+            </details>
+
+            <details class="code-box">
+                <summary>box_kernel</summary>
+                <pre><code>def box_kernel(kernel_size):
+    return np.full((kernel_size, kernel_size), 1.0 / (kernel_size ** 2))
+</code></pre>
+            </details>
+
+            <details class="code-box">
+                <summary>pad_image</summary>
+                <pre><code>def pad_image(image, kernel):
+    pad = (kernel.shape[0] - 1) // 2
+    return np.pad(image, pad, mode='constant', constant_values=0)
+</code></pre>
+            </details>
+
+            <h3 class="subsection-heading">Gradient Magnitude</h3>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">In this section, I built on the strategies of the last section to isolate the 
+                    edges of an image. This image below is the original.</p>
+                <figure class="featured-image">
+                    <img src="./cameraman.jpg" alt="OG camerman">
+                    <figcaption>OG cameraman</figcaption>
+                </figure>
+                <p class="analysis-textbox">As above, I created "partial derivative" images. The first is the partial derivative
+                    with respect to x, which can be loosely thought of as the verticle edge finder. The second is the partial
+                    derivative with respect to y, which can be loosely thought of the horizontal edge finder.
+                </p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./cam_dx.jpg" alt="camerman dx">
+                        <figcaption>signal.convolve2d(image, np.array([[1, 0, -1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./cam_dy.jpg" alt="cameraman dy">
+                        <figcaption>signal.convolve2d(image, np.array([[1], [0], [-1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">Finally, I combined these partial derivative into one image, called the gradient
+                    magnitude image because the brightness of each pixel in the gradient magntiude represents the amplitude of
+                    the gradient of the corresponding pixel in the original image. This is found by taking the square root of the
+                    sum of the squares of the pixel values from the partial derivative images.
+                </p>
+                <div class="image-text-row">
+                    <figure class="gallery-item">
+                        <img src="./cam_gm.jpg" alt="cameraman gradient magnitude">
+                        <figcaption>gradiant_magnitude(image)</figcaption>
+                    </figure>
+                    <p class="analysis-textbox">The image on the left is the raw gradient magnitude. In it, values can be shades of
+                        gray corresponding to gradient changes not caused by edges. To fix this, I set all the pixels in the image
+                        to either black or white. Pixels that were greater than 30% bright were made white and all other pixels were
+                        made black, creating the image on the right that corresponds much more to the true edges in the image.
+                    </p>
+                    <figure class="gallery-item">
+                        <img src="./cam_gm_0.3.jpg" alt="cameraman binary gradient magnitude">
+                        <figcaption>binary_gradiant_magnitude(image, threshold=0.3)</figcaption>
+                    </figure>
+                </div>
+            </div>
+
+            <details class="code-box text-dropdown">
+                <summary>Why 30%?</summary>
+                <div class="text-dropdown-body">
+                    <div class="image-gallery image-gallery--thirds">
+                        <figure class="gallery-item">
+                            <img src="./cam_gm_0.25.jpg" alt="cameraman binary gradient magnitude, threshold 0.25">
+                            <figcaption>binary_gradiant_magnitude(image, threshold=0.25)</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./cam_gm_0.3.jpg" alt="cameraman binary gradient magnitude, threshold 0.3">
+                            <figcaption>binary_gradiant_magnitude(image, threshold=0.3)</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./cam_gm_0.5.jpg" alt="cameraman binary gradient magnitude, threshold 0.5">
+                            <figcaption>binary_gradiant_magnitude(image, threshold=0.5)</figcaption>
+                        </figure>
+                    </div>
+                    <p>There is no perfect answer. Because of the nature of gradients, things that we don't consider
+                        edges will sometimes have a higher value than things that we do, so it's impossible to perfectly
+                        cut out all the nonedges while keeping all the edges. I chose 30% because I felt it did the best
+                        to balance these. Looking at the images above, it felt like there was too much texture in the
+                        grass at 25%. Similarly, I felt too many edges were missing at 50%.
+                    </p>
+                </div>
+            </details>
+
+            <details class="code-box">
+                <summary>gradiant_magnitude</summary>
+                <pre><code>def gradiant_magnitude(image):
+    dx = np.array([[1, 0, -1]])
+    dy = np.array([[1], [0], [-1]])
+    im_dx = signal.convolve2d(image, dx, mode='same', boundary='fill', fillvalue=0)
+    im_dy = signal.convolve2d(image, dy, mode='same', boundary='fill', fillvalue=0)
+    return np.sqrt(im_dx ** 2 + im_dy ** 2)
+</code></pre>
+            </details>
+
+            <details class="code-box">
+                <summary>binary_gradiant_magnitude</summary>
+                <pre><code>def binary_gradiant_magnitude(image, threshold=0.3):
+    return (gradiant_magnitude(image) > threshold).astype(int)
+</code></pre>
+            </details>
+
+            <h3 class="subsection-heading">Blur + Gradient Magnitude</h3>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">To attempt to isolate the edges even better, I then blurred the image
+                    by convolving it with a 9x9 box filter before finding the gradient magnitude. This ends up
+                    reducing the gradient in areas like the grass, where blurring creates a more uniform region
+                    with less gradient spikes caused by texture. It preserves the true edges, because even after
+                    being blurred these areas maintain a sharp change in brightness (even if it is <i>slightly</i> less
+                    sharp). As the gradients of the nonedges was reduces, the sensitivity could be upped to 14% brightness
+                    while still picking up less nonedge pixels than before.</p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./cam_blur2_gm.jpg" alt="blur2">
+                        <figcaption>smooth_gradiant_magnitude_two_convolutions(image, threshold=0)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./cam_blur2_0.14.jpg" alt="Placeholder image">
+                        <figcaption>smooth_gradiant_magnitude_two_convolutions(image, threshold=0.14)</figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">To complete this same process even more efficiently, I took advantage of the
+                    associative property of convolution. Instead of convolving the image with a box filter and then convolving
+                    the result with a derivative filter, I convolved the box filter with the derivative filter. This produced
+                    the following filters for the x partial derivative and the y partial derivative, respectively.
+                </p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./dx_filt.jpg" alt="dx filt">
+                        <figcaption>smooth_gradiant_magnitude(image)[0]</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./dy_filt.jpg" alt="dy filt">
+                        <figcaption>smooth_gradiant_magnitude(image)[1]</figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">Then, using these filters and convolving with the original image I produced
+                    the partial derivative images. Combining them in the same way as before, I got the following images. 
+                </p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./cam_blur_gm.jpg" alt="blur gm">
+                        <figcaption>smooth_gradiant_magnitude(image, threshold=0)[2]</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./cam_blur_0.14.jpg" alt="blur binary gm">
+                        <figcaption>smooth_gradiant_magnitude(image)[2]</figcaption>
+                    </figure>
+                </div>
+            </div>
+
+            <details class="code-box">
+                <summary>smooth_gradiant_magnitude_two_convolutions</summary>
+                <pre><code>def smooth_gradiant_magnitude_two_convolutions(image, kernel_size=9, sigma=0, threshold=0.14):
+    gaus = cv2.getGaussianKernel(kernel_size, sigma)
+    kernel = np.outer(gaus, gaus.T)
+    image = signal.convolve2d(image, kernel, mode='same', boundary='fill', fillvalue=0)
+    if threshold == 0:
+        return gradiant_magnitude(image)
+    return binary_gradiant_magnitude(image, threshold)
+</code></pre>
+            </details>
+
+            <details class="code-box">
+                <summary>smooth_gradiant_magnitude</summary>
+                <pre><code>def smooth_gradiant_magnitude(image, kernel_size=9, sigma=0, threshold=0.14):
+    gaus = cv2.getGaussianKernel(kernel_size, sigma)
+    kernel = np.outer(gaus, gaus.T)
+    dx = np.array([[1, 0, -1]])
+    dy = np.array([[1], [0], [-1]])
+    kernel_dx = signal.convolve2d(kernel, dx, mode='full', boundary='fill', fillvalue=0)
+    kernel_dy = signal.convolve2d(kernel, dy, mode='full', boundary='fill', fillvalue=0)
+    im_dx = signal.convolve2d(image, kernel_dx, mode='same', boundary='fill', fillvalue=0)
+    im_dy = signal.convolve2d(image, kernel_dy, mode='same', boundary='fill', fillvalue=0)
+    if threshold == 0:
+        ret = np.sqrt(im_dx ** 2 + im_dy ** 2)
+    else:
+        ret = (np.sqrt(im_dx ** 2 + im_dy ** 2) > threshold).astype(int)
+    return kernel_dx, kernel_dy, ret
+</code></pre>
+            </details>
+        </section>
+
+        <section class="gallery-section">
+            <h2 class="part-heading">Part 2</h2>
+        </section>
+
         <a class="back-link" href="../index.html">← Back to Portfolio</a>
     </div>
+    <script src="../lightbox.js"></script>
 </body>
 </html>
