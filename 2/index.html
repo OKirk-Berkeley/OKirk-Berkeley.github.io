@@ -541,15 +541,198 @@
             </div>
 
             <details class="code-box">
-                <summary>Placeholder code 1</summary>
-                <pre><code># Placeholder code
+                <summary>mask_half</summary>
+                <pre><code>def mask_half(image, left_half):
+    if left_half:
+        image[:, image.shape[1] // 2:, :] = 0
+    else:
+        image[:, :image.shape[1] // 2, :] = 0
+    return image
 </code></pre>
             </details>
             <details class="code-box">
-                <summary>Placeholder code 2</summary>
-                <pre><code># Placeholder code
+                <summary>laplacian_stack</summary>
+                <pre><code>def laplacian_stack(image, layers=4, g_stack=np.array([])):
+    r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
+    g_stack_r, g_stack_g, g_stack_b = np.array([]), np.array([]), np.array([])
+    if g_stack.size > 0:
+        g_stack_r, g_stack_g, g_stack_b = g_stack[:, :, :, 0], g_stack[:, :, :, 1], g_stack[:, :, :, 2]
+    r = laplacian_stack_gray(r, layers, g_stack_r)
+    g = laplacian_stack_gray(g, layers, g_stack_g)
+    b = laplacian_stack_gray(b, layers, g_stack_b)
+    return np.stack([r, g, b], axis=-1)
 </code></pre>
             </details>
+            <details class="code-box">
+                <summary>laplacian_stack_gray</summary>
+                <pre><code>def laplacian_stack_gray(image, layers=4, g_stack=np.array([])):
+    ret = np.empty([layers, image.shape[0], image.shape[1]])
+    if g_stack.size == 0:
+        g_stack = guassian_stack_gray(image, layers)
+    for i in range(layers):
+    if i == layers - 1:
+        ret[i] = g_stack[i]
+    else:
+        ret[i] = g_stack[i] - g_stack[i + 1]
+    return ret
+</code></pre>
+            </details>
+            <details class="code-box">
+                <summary>guassian_stack_gray</summary>
+                <pre><code>def guassian_stack_gray(image, layers=4):
+    ret = np.empty([layers, image.shape[0], image.shape[1]])
+    ret[0] = image
+    sigma = 2
+    for i in range(1, layers):
+        image = blur(image, sigma)
+        ret[i] = image
+        sigma = sigma * 2
+    return ret
+</code></pre>
+            </details>
+            <details class="code-box">
+                <summary>combine_stacks</summary>
+                <pre><code>def combine_stacks(stack1, stack2):
+    return stack1 + stack2
+</code></pre>
+            </details>
+
+            <h3 class="subsection-heading">Multiresolution Blending</h3>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">Utilizing these stacks, it is possible to smoothly blend images without creating
+                    a seam. To do so, it is necessaray to blend each level of each image's respective laplacian pyramid at a
+                    different level. If high frequency details are blended with a large overlap zone, there will be conflicting
+                    fine details in the overlap zone that look poor together. However, if low frequency information is blended
+                    over a small overlap zone, an obvious seam will appear where shapes and colors drastically change. To solve
+                    this, I created a corresponding mask that is blurred to a level fitting the frequcy of the images at the
+                    same level. The result of combining different levels of the pyramid across this mask is shown below.</p>
+                <div class="image-switcher">
+                    <div class="image-switcher__panel image-gallery comparison-gallery image-gallery--compact" data-panel="original">
+                        <figure class="gallery-item">
+                            <img src="./part2/apple2_og.jpg" alt="Placeholder image">
+                            <figcaption>Original apple image</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/orange2_og.jpg" alt="Placeholder image">
+                            <figcaption>Original orange image</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/mask_og.jpg" alt="Placeholder image">
+                            <figcaption>Original mask</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/combo_og.jpg" alt="Placeholder image">
+                            <figcaption>Images combined over mask</figcaption>
+                        </figure>
+                    </div>
+                    <div class="image-switcher__panel image-gallery comparison-gallery image-gallery--compact" data-panel="level0" hidden>
+                        <figure class="gallery-item">
+                            <img src="./part2/apple2_high.jpg" alt="Placeholder image">
+                            <figcaption>Apple laplacian stack at index 0 (high frequency)</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/orange2_high.jpg" alt="Placeholder image">
+                            <figcaption>Orange laplacian stack at index 0 (high frequency)</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/mask_high.jpg" alt="Placeholder image">
+                            <figcaption>Mask guassian stack at index 0</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/combo0.jpg" alt="Placeholder image">
+                            <figcaption>Images combined over mask</figcaption>
+                        </figure>
+                    </div>
+                    <div class="image-switcher__panel image-gallery comparison-gallery image-gallery--compact" data-panel="level2" hidden>
+                        <figure class="gallery-item">
+                            <img src="./part2/apple2_med.jpg" alt="Placeholder image">
+                            <figcaption>Apple laplacian stack at index 2 (medium frequency)</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/orange2_med.jpg" alt="Placeholder image">
+                            <figcaption>Orange laplacian stack at index 2 (medium frequency)</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/mask_med.jpg" alt="Placeholder image">
+                            <figcaption>Mask guassian stack at index 2</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/combo2.jpg" alt="Placeholder image">
+                            <figcaption>Images combined over mask</figcaption>
+                        </figure>
+                    </div>
+                    <div class="image-switcher__panel image-gallery comparison-gallery image-gallery--compact" data-panel="level4" hidden>
+                        <figure class="gallery-item">
+                            <img src="./part2/apple2_low.jpg" alt="Placeholder image">
+                            <figcaption>Apple laplacian stack at index 4 (low frequency)</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/orange2_low.jpg" alt="Placeholder image">
+                            <figcaption>Orange laplacian stack at index 4 (low frequency)</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/mask_low.jpg" alt="Placeholder image">
+                            <figcaption>Mask guassian stack at index 4</figcaption>
+                        </figure>
+                        <figure class="gallery-item">
+                            <img src="./part2/combo4.jpg" alt="Placeholder image">
+                            <figcaption>Images combined over mask</figcaption>
+                        </figure>
+                    </div>
+                    <div class="image-switcher__buttons" role="group" aria-label="Image set">
+                        <button type="button" class="image-switcher__button is-active" data-panel="original" aria-pressed="true">original images</button>
+                        <button type="button" class="image-switcher__button" data-panel="level0" aria-pressed="false">level 0</button>
+                        <button type="button" class="image-switcher__button" data-panel="level2" aria-pressed="false">level 2</button>
+                        <button type="button" class="image-switcher__button" data-panel="level4" aria-pressed="false">level 4</button>
+                    </div>
+                </div>
+                <p class="analysis-textbox">That process creates a laplacian stack of combined images. To obtain our final image,
+                    we only have to reverse the laplacian stacking process to obtain our combined image. This is possible because
+                    each element in the stack summed with the image one layer down in the gaussian stack produces the next image
+                    in the gaussian stack. Since the last image in the laplacian stack is equal to the last image in the gaussian
+                    stack, we can add the second to last laplacian layer to the last gaussian layer to produce the second to last
+                    gaussian layer. We can add this to the next laplacian layer to get to the next gaussian layer up. We can repeat
+                    this process to move up the guassian stack until we get to the very top, which is the original image! Using this
+                    process on our combined laplacian stack produces the following image, efficiently blending the apple and orange.
+                </p>
+                <figure class="featured-image">
+                    <img src="./part2/orapple_final.jpg" alt="Placeholder image">
+                    <figcaption>laplacian_unstack(splice(apple_im, orange_im, mask, layers=5))</figcaption>
+                </figure>
+            </div>
+                <details class="code-box">
+                    <summary>splice</summary>
+                    <pre><code>def splice(im1, im2, mask, layers=4):
+    r1, g1, b1 = im1[:, :, 0], im1[:, :, 1], im1[:, :, 2]
+    r2, g2, b2 = im2[:, :, 0], im2[:, :, 1], im2[:, :, 2]
+    r = splice_gray(r1, r2, mask, layers)
+    g = splice_gray(g1, g2, mask, layers)
+    b = splice_gray(b1, b2, mask, layers)
+    return np.stack([r, g, b], axis=-1)
+    </code></pre>
+                </details>
+                <details class="code-box">
+                    <summary>splice_gray</summary>
+                    <pre><code>def splice_gray(im1, im2, mask, layers=4):
+        l_stack1 = laplacian_stack_gray(im1, layers)
+        l_stack2 = laplacian_stack_gray(im2, layers)
+        g_stack_mask = guassian_stack_gray(mask, layers)
+        g_stack_mask_inverse = (g_stack_mask * -1) + 1
+        ret = np.empty_like(l_stack1)
+        for layer in range(layers):
+            ret[layer] = g_stack_mask[layer] * l_stack1[layer] + g_stack_mask_inverse[layer] * l_stack2[layer]
+        return ret
+    </code></pre>
+                </details>
+                <details class="code-box">
+                    <summary>laplacian_unstack</summary>
+                    <pre><code>def laplacian_unstack(l_stack):
+        image = l_stack[-1]
+        for i in range(l_stack.shape[0] - 2, -1, -1):
+            image = image + l_stack[i]
+        return image
+    </code></pre>
+                </details>
         </section>
 
         <a class="back-link" href="../index.html">← Back to Portfolio</a>
@@ -557,5 +740,6 @@
     <script src="../lightbox.js"></script>
     <script src="../compare-slider.js"></script>
     <script src="../code-popup.js"></script>
+    <script src="../image-switcher.js"></script>
 </body>
 </html>
