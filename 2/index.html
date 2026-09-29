@@ -25,11 +25,11 @@
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
-                        <img src="./self.jpg" alt="OG selfie (color)">
+                        <img src="./part1/self.jpg" alt="OG selfie (color)">
                         <figcaption>OG selfie (color)</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./self_gray.jpg" alt="OG selfie (gray)">
+                        <img src="./part1/self_gray.jpg" alt="OG selfie (gray)">
                         <figcaption>OG selfie (gray)</figcaption>
                     </figure>
                 </div>
@@ -41,21 +41,21 @@
                 up even more by utilizing vector operations to minimize the number of for loops even more.</p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
-                        <img src="./selfie_4.jpg" alt="4 for loops">
+                        <img src="./part1/selfie_4.jpg" alt="4 for loops">
                         <figcaption>
                             <span class="caption-line">convolve_four_for_loops(image, box_kernel(9))</span>
                             <span class="caption-line">50.61 seconds</span>
                         </figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./selfie_2.jpg" alt="2 for loops">
+                        <img src="./part1/selfie_2.jpg" alt="2 for loops">
                         <figcaption>
                             <span class="caption-line">convolve_two_for_loops(image, box_kernel(9))</span>
                             <span class="caption-line">8.28 seconds</span>
                         </figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./selfie_scipy.jpg" alt="scipy">
+                        <img src="./part1/selfie_scipy.jpg" alt="scipy">
                         <figcaption>
                             <span class="caption-line">signal.convolve2d(image, box_kernel(9), mode='same', boundary='fill', fillvalue=0)</span>
                             <span class="caption-line">0.23 seconds</span>
@@ -69,15 +69,15 @@
                     being very useful in computing the "gradient magnitude" (or "edge image"), as shown at the end.</p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
-                        <img src="./selfie_dx.jpg" alt="dx">
+                        <img src="./part1/selfie_dx.jpg" alt="dx">
                         <figcaption>signal.convolve2d(image, np.array([[1, 0, -1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./selfie_dy.jpg" alt="dy">
+                        <img src="./part1/selfie_dy.jpg" alt="dy">
                         <figcaption>signal.convolve2d(image, np.array([[1], [0], [-1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./selfie_gm.jpg" alt="gm">
+                        <img src="./part1/selfie_gm.jpg" alt="gm">
                         <figcaption>Implementation discussed in next section</figcaption>
                     </figure>
                 </div>
@@ -139,7 +139,7 @@
                 <p class="analysis-textbox">In this section, I built on the strategies of the last section to isolate the 
                     edges of an image. This image below is the original.</p>
                 <figure class="featured-image">
-                    <img src="./cameraman.jpg" alt="OG camerman">
+                    <img src="./part1/cameraman.jpg" alt="OG camerman">
                     <figcaption>OG cameraman</figcaption>
                 </figure>
                 <p class="analysis-textbox">As above, I created "partial derivative" images. The first is the partial derivative
@@ -148,11 +148,11 @@
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
-                        <img src="./cam_dx.jpg" alt="camerman dx">
+                        <img src="./part1/cam_dx.jpg" alt="camerman dx">
                         <figcaption>signal.convolve2d(image, np.array([[1, 0, -1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./cam_dy.jpg" alt="cameraman dy">
+                        <img src="./part1/cam_dy.jpg" alt="cameraman dy">
                         <figcaption>signal.convolve2d(image, np.array([[1], [0], [-1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
                     </figure>
                 </div>
@@ -163,7 +163,7 @@
                 </p>
                 <div class="image-text-row">
                     <figure class="gallery-item">
-                        <img src="./cam_gm.jpg" alt="cameraman gradient magnitude">
+                        <img src="./part1/cam_gm.jpg" alt="cameraman gradient magnitude">
                         <figcaption>gradiant_magnitude(image)</figcaption>
                     </figure>
                     <p class="analysis-textbox">The image on the left is the raw gradient magnitude. In it, values can be shades of
@@ -172,7 +172,7 @@
                         made black, creating the image on the right that corresponds much more to the true edges in the image.
                     </p>
                     <figure class="gallery-item">
-                        <img src="./cam_gm_0.3.jpg" alt="cameraman binary gradient magnitude">
+                        <img src="./part1/cam_gm_0.3.jpg" alt="cameraman binary gradient magnitude">
                         <figcaption>binary_gradiant_magnitude(image, threshold=0.3)</figcaption>
                     </figure>
                 </div>
@@ -183,15 +183,15 @@
                 <div class="text-dropdown-body">
                     <div class="image-gallery image-gallery--thirds">
                         <figure class="gallery-item">
-                            <img src="./cam_gm_0.25.jpg" alt="cameraman binary gradient magnitude, threshold 0.25">
+                            <img src="./part1/cam_gm_0.25.jpg" alt="cameraman binary gradient magnitude, threshold 0.25">
                             <figcaption>binary_gradiant_magnitude(image, threshold=0.25)</figcaption>
                         </figure>
                         <figure class="gallery-item">
-                            <img src="./cam_gm_0.3.jpg" alt="cameraman binary gradient magnitude, threshold 0.3">
+                            <img src="./part1/cam_gm_0.3.jpg" alt="cameraman binary gradient magnitude, threshold 0.3">
                             <figcaption>binary_gradiant_magnitude(image, threshold=0.3)</figcaption>
                         </figure>
                         <figure class="gallery-item">
-                            <img src="./cam_gm_0.5.jpg" alt="cameraman binary gradient magnitude, threshold 0.5">
+                            <img src="./part1/cam_gm_0.5.jpg" alt="cameraman binary gradient magnitude, threshold 0.5">
                             <figcaption>binary_gradiant_magnitude(image, threshold=0.5)</figcaption>
                         </figure>
                     </div>
@@ -233,11 +233,11 @@
                     while still picking up less nonedge pixels than before.</p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
-                        <img src="./cam_blur2_gm.jpg" alt="blur2">
+                        <img src="./part1/cam_blur2_gm.jpg" alt="blur2">
                         <figcaption>smooth_gradiant_magnitude_two_convolutions(image, threshold=0)</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./cam_blur2_0.14.jpg" alt="Placeholder image">
+                        <img src="./part1/cam_blur2_0.14.jpg" alt="Placeholder image">
                         <figcaption>smooth_gradiant_magnitude_two_convolutions(image, threshold=0.14)</figcaption>
                     </figure>
                 </div>
@@ -248,11 +248,11 @@
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
-                        <img src="./dx_filt.jpg" alt="dx filt">
+                        <img src="./part1/dx_filt.jpg" alt="dx filt">
                         <figcaption>smooth_gradiant_magnitude(image)[0]</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./dy_filt.jpg" alt="dy filt">
+                        <img src="./part1/dy_filt.jpg" alt="dy filt">
                         <figcaption>smooth_gradiant_magnitude(image)[1]</figcaption>
                     </figure>
                 </div>
@@ -261,11 +261,11 @@
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
-                        <img src="./cam_blur_gm.jpg" alt="blur gm">
+                        <img src="./part1/cam_blur_gm.jpg" alt="blur gm">
                         <figcaption>smooth_gradiant_magnitude(image, threshold=0)[2]</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./cam_blur_0.14.jpg" alt="blur binary gm">
+                        <img src="./part1/cam_blur_0.14.jpg" alt="blur binary gm">
                         <figcaption>smooth_gradiant_magnitude(image)[2]</figcaption>
                     </figure>
                 </div>
@@ -305,6 +305,54 @@
 
         <section class="gallery-section">
             <h2 class="part-heading">Part 2</h2>
+
+            <h3 class="subsection-heading">Sharpening</h3>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">In this section, I build upon the strategies shown in the last
+                    to sharpen blurry images. I will show the complete process using the image of the Taj Mahal shown
+                    below, as well as the start and end products of a few more examples.</p>
+                <figure class="featured-image">
+                    <img src="./part2/taj_og.jpg" alt="OG taj">
+                    <figcaption>Original image</figcaption>
+                </figure>
+                <p class="analysis-textbox">A blurry image often appears sharper if it contains more high frequency information.
+                    In the last section, I showed how convolving an image with a guassian filter can produce a blurry image. This
+                    process actually preserves the low frequency information of an image (e.g. general shapes, colors) while reducing
+                    the high frequency information (details). To isolate just the high frequency information, we can subtract the low
+                    frequncy version from the original image. We can then add more high frequency strength to our original image by
+                    adding the isolated high frequcy image to the original. Although my final version does this in one step, the images
+                    below show the approximate steps of the process.
+                </p>
+                <div class="image-gallery image-gallery--thirds">
+                    <figure class="gallery-item">
+                        <img src="./part1/placeholder.svg" alt="Taj blurred">
+                        <figcaption>Taj blurred</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part1/placeholder.svg" alt="Taj high freq">
+                        <figcaption>Taj high freq</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part1/placeholder.svg" alt="Taj sharp">
+                        <figcaption>Taj sharp</figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">Placeholder text for this row.</p>
+                <div class="image-gallery image-gallery--thirds">
+                    <figure class="gallery-item">
+                        <img src="./part1/placeholder.svg" alt="alpha0.5">
+                        <figcaption>alpha0.5</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part1/placeholder.svg" alt="alpha1">
+                        <figcaption>alpha1</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part1/placeholder.svg" alt="alpha2">
+                        <figcaption>alpha2</figcaption>
+                    </figure>
+                </div>
+            </div>
         </section>
 
         <a class="back-link" href="../index.html">← Back to Portfolio</a>
