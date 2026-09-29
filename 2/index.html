@@ -325,38 +325,237 @@
                 </p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
-                        <img src="./part1/placeholder.svg" alt="Taj blurred">
-                        <figcaption>Taj blurred</figcaption>
+                        <img src="./part2/tai_low_freq.jpg" alt="Taj blurred">
+                        <figcaption>Blurred (low frequencies only)</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./part1/placeholder.svg" alt="Taj high freq">
-                        <figcaption>Taj high freq</figcaption>
+                        <img src="./part2/taj_high_freq.jpg" alt="Taj high freq">
+                        <figcaption>Original - Blurred (high frequencies only)</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./part1/placeholder.svg" alt="Taj sharp">
-                        <figcaption>Taj sharp</figcaption>
+                        <img src="./part2/taj_1.jpg" alt="Taj sharp">
+                        <figcaption>Sharpened</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox">Placeholder text for this row.</p>
+                <p class="analysis-textbox">Once we have the isolated high frequency image, it's easy to adjust how much
+                    we add into the original image. The formula for creating the final image from the original and the high
+                    frequency is just: result = original + alpha * high-frequency where alpha is how much we choose to add. Here
+                    are the results for a handful of differernt values of alpha.
+                </p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
-                        <img src="./part1/placeholder.svg" alt="alpha0.5">
-                        <figcaption>alpha0.5</figcaption>
+                        <img src="./part2/taj_0.5.jpg" alt="alpha0.5">
+                        <figcaption>color_unmask(im, alpha=0.5)</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./part1/placeholder.svg" alt="alpha1">
-                        <figcaption>alpha1</figcaption>
+                        <img src="./part2/taj_1.jpg" alt="alpha1">
+                        <figcaption>color_unmask(im, alpha=1)</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./part1/placeholder.svg" alt="alpha2">
-                        <figcaption>alpha2</figcaption>
+                        <img src="./part2/taj_2.jpg" alt="alpha2">
+                        <figcaption>color_unmask(im, alpha=2)</figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">To make this entire process possible by only convolving the original image with
+                    a signle kernel is easy. Since the formula is output = input - i
+                </p>
+                <figure class="compare-slider">
+                    <div class="compare-slider__frame">
+                        <img class="compare-slider__base" src="./part2/taj_1.jpg" alt="Sharpened Taj Mahal">
+                        <img class="compare-slider__overlay" src="./part2/taj_og.jpg" alt="Original Taj Mahal">
+                        <span class="compare-slider__label compare-slider__label--left">Original</span>
+                        <span class="compare-slider__label compare-slider__label--right">Sharpened</span>
+                        <input class="compare-slider__range" type="range" min="0" max="100" step="0.1" value="50"
+                            aria-label="Drag to compare original and sharpened images">
+                        <div class="compare-slider__handle"></div>
+                    </div>
+                    <figcaption>Drag the slider to compare the original and sharpened images (alpha = 1 for sharpened)</figcaption>
+                </figure>
+                <p class="analysis-textbox">This is how it looks on two images I selected. In the first, it greatly reduces
+                    the blur by using a huge alpha value. In the second, the more modest alpha value is able to subtley add
+                    some texture to the stone structures.
+                </p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./part2/sharpen1.webp" alt="Original image 1">
+                        <figcaption>Original</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/sharpened1.jpg" alt="Sharpened image 1">
+                        <figcaption>Sharpened (alpha = 25)</figcaption>
+                    </figure>
+                </div>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./part2/sharpen2.jpg" alt="Original image 2">
+                        <figcaption>Original</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/sharpened2.jpg" alt="Sharpened image 2">
+                        <figcaption>Sharpened (alpha = 5)</figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">While this strategy can make the high frequency details of an image easier to
+                    spot, they can't create details that weren't there. For this reason, if we take a detailed image and
+                    blur it, when we attempt to recreate the original image using only the blurred one we get a much
+                    lower quality image. This is because the original low pass filter that blurred it permanently destroyed
+                    high frequency information about the image. The sharpening technique can enhance the surviving high
+                    frequency information, but it cannot recreate what was lost.</p>
+                <div class="image-gallery image-gallery--thirds">
+                    <figure class="gallery-item">
+                        <img src="./part2/blur_unmaskA.jpg" alt="Moon og">
+                        <figcaption>Original</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/blur_unmaskB.jpg" alt="Moon blur">
+                        <figcaption>Blurred</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/blur_unmaskC.jpg" alt="Moon sharp">
+                        <figcaption>Sharpened from blur (alpha = 10)</figcaption>
                     </figure>
                 </div>
             </div>
+            <details class="code-box">
+                <summary>color_unmask</summary>
+                <pre><code>def color_unmask(image, kernel_size=9, sigma=0, alpha=2):
+    r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
+    r = unmask(r, kernel_size, sigma, alpha)
+    g = unmask(g, kernel_size, sigma, alpha)
+    b = unmask(b, kernel_size, sigma, alpha)
+    return np.dstack([r, g, b])
+</code></pre>
+            </details>
+            <details class="code-box">
+                <summary>unmask</summary>
+                <pre><code>def unmask(image, kernel_size=9, sigma=0, alpha=2):
+    gaus = cv2.getGaussianKernel(kernel_size, sigma)
+    gaus = np.outer(gaus, gaus.T)
+    id = np.zeros([kernel_size, kernel_size])
+    id[(kernel_size - 1) // 2, (kernel_size - 1) // 2] = 1
+    kernel = (1 + alpha) * id - alpha * gaus
+    return signal.convolve2d(image, kernel, mode='same', boundary='fill', fillvalue=0)
+</code></pre>
+            </details>
+
+            <h3 class="subsection-heading">Hybrid Images</h3>
+
+            <h3 class="subsection-heading">Gaussian and Laplacian Stacks</h3>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">This is a Laplacian stack, which is similar to a Guassian stack except that
+                    it isolates individual frequencies instead of just progressively reducing frequencies. To create each
+                    element in the stack, the corresponding element in the Guassian stack is taken and the next image
+                    in the Gaussian stack is subtracted from it. This isolates a frequency band because all of the higher
+                    frequencies are already removed when starting with a Guassian convolution of the original image and
+                    all the lower frequencies are removed by subtracted the next Guassian, which contains only lower
+                    frequencies. The high, medium, and low frequencies of the apple, orange and combined images can be
+                    seen below. The original images are at the bottom and the high, medium and low frequencies are on the
+                    first, second and third rows respectively. Right now, the oraple is just a sum of the orange and apple
+                    images, but that will be refined in the next section.</p>
+                <div class="image-gallery image-gallery--thirds image-gallery--compact">
+                    <figure class="gallery-item">
+                        <img src="./part2/apple_high.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>laplacian_stack(mask_half(im, True), layers=5)[0]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orange_high.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>laplacian_stack(mask_half(im, False), layers=5)[0]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orapple_high.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>combine_stacks(laplacian_stack(mask_half(apple_im, True), layers=5), laplacian_stack(mask_half(orange_im, False), layers=5))[0]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/apple_med.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>laplacian_stack(mask_half(im, True), layers=5)[2]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orange_med.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>laplacian_stack(mask_half(im, False), layers=5)[2]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orapple_med.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>combine_stacks(laplacian_stack(mask_half(apple_im, True), layers=5), laplacian_stack(mask_half(orange_im, False), layers=5))[2]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/apple_low.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>laplacian_stack(mask_half(im, True), layers=5)[4]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orange_low.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>laplacian_stack(mask_half(im, False), layers=5)[4]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orapple_low.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>combine_stacks(laplacian_stack(mask_half(apple_im, True), layers=5), laplacian_stack(mask_half(orange_im, False), layers=5))[4]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/apple_og.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>mask_half(im, True)</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orange_og.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>mask_half(im, False)</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orapple_og.jpg" alt="Placeholder image">
+                        <figcaption>
+                            <button type="button" class="code-popup-button">code</button>
+                            <span class="code-popup-text" hidden>mask_half(apple_im, True) + mask_half(orange_im, False)</span>
+                        </figcaption>
+                    </figure>
+                </div>
+            </div>
+
+            <details class="code-box">
+                <summary>Placeholder code 1</summary>
+                <pre><code># Placeholder code
+</code></pre>
+            </details>
+            <details class="code-box">
+                <summary>Placeholder code 2</summary>
+                <pre><code># Placeholder code
+</code></pre>
+            </details>
         </section>
 
         <a class="back-link" href="../index.html">← Back to Portfolio</a>
     </div>
     <script src="../lightbox.js"></script>
+    <script src="../compare-slider.js"></script>
+    <script src="../code-popup.js"></script>
 </body>
 </html>
