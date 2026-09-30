@@ -501,13 +501,21 @@
                         <figcaption>Aligned image of animated Maui</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox">To make the hybrid image, I need a low pass version of the animated image and a high pass
-                    of the live action one. Finding the right sigma for the gaussian kernel used to blur these images is important; if
-                    the low pass image uses too small a sigma, it retains some high frequency details that are visible from up close, but
-                    if the sigma is too large it creates an image too blurry to identify even at a distance. Similarly, if the sigma is
-                    too low on the high pass image, it retains some low pass information that's visible from afar, but if it's too high
-                    it reduces the image's legability even from close up. After some expirimentation, I landed on a sigma of 10 for the low
-                    pass and 3 for the high pass. These were the resulting images.
+                <p class="analysis-textbox">To make the hybrid image, I need a low-pass version of the animated image
+                    and a high-pass version of the live-action one. Finding the right sigma for the Gaussian kernels
+                    used to filter these images is important because sigma determines the filter's cutoff frequency.
+                    For a Gaussian filter, a larger sigma corresponds to a lower cutoff frequency, meaning that fewer
+                    high-frequency details are retained. If the low-pass image uses too small a sigma, its cutoff
+                    frequency is too high and it retains high-frequency details that are visible up close. However, if
+                    the sigma is too large, its cutoff frequency becomes too low, creating an image that is too blurry
+                    to identify even from a distance. Similarly, for the high-pass image, a sigma that is too small
+                    results in a higher cutoff frequency and can leave too much low-frequency information in the image,
+                    making it visible from afar. If the sigma is too large, the cutoff frequency becomes too low and
+                    more of the image's fine details are removed, reducing its legibility even from close up. After
+                    some experimentation, I found that a sigma of 10 for the low-pass image and 3 for the high-pass
+                    image provided the best balance. These correspond to cutoff frequencies of approximately 0.019
+                    cycles per pixel and 0.062 cycles per pixel, respectively, using the half-amplitude definition of
+                    the Gaussian cutoff frequency. These were the resulting images.
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
@@ -521,7 +529,7 @@
                 </div>
                 <figure class="featured-image">
                     <img src="./part2/hybrid2.jpg" alt="Hybrid image 2">
-                    <figcaption>Hybrid image</figcaption>
+                    <figcaption>hybrid_image(animated_im, live_im, 10, 3)</figcaption>
                 </figure>
                 <figure class="size-slider">
                     <div class="size-slider__stage" style="aspect-ratio: 600 / 680;">
@@ -531,6 +539,13 @@
                     <figcaption>Drag the slider to shrink the image and simulate viewing it from farther away:
                         <span class="size-slider__value">100%</span></figcaption>
                 </figure>
+                <p class="analysis-textbox">Looking at the Fourier Transforms of these images helps us see what's going
+                    on. The original images have fairly usual graphs; a spread of energy across the high and low frequencies
+                    with a huge spike at the low frequencies in the very center. The low pass image isolates just that spike
+                    in the center while the high pass removes it and retains everything else. The hybrid image combines the spike
+                    in the low frequencies from the animated image with the rest of the graph from the live action image. This makes
+                    sense as the image itself contains the low frequency version of the animated image and the high frequency version
+                    of the live action image.</p>
                 <div class="image-gallery image-gallery--fifths">
                     <figure class="gallery-item">
                         <img src="./part2/hybrid2_low.jpg" alt="Aligned animated Maui">
@@ -573,7 +588,44 @@
                         <figcaption>Fourier transform</figcaption>
                     </figure>
                 </div>
+                <p class="analysis-textbox">With all that in mind, here is one final set of input images and the hybrid image they created.</p>
+                <div class="image-gallery image-gallery--thirds">
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid3_input_a.jpg" alt="Input image: frowning face">
+                        <figcaption>Input image (frowning)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid3_input_b.jpg" alt="Input image: smiling face">
+                        <figcaption>Input image (smiling)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid3.jpg" alt="Hybrid image of the frowning and smiling faces">
+                        <figcaption>hybrid_image(smile_im, frown_im, 5, 3)</figcaption>
+                    </figure>
+                </div>
             </div>
+
+            <details class="code-box">
+                <summary>hybrid_image</summary>
+                <pre><code>def hybrid_image(im1, im2, sig1, sig2):
+    return blur(im1, sigma=sig1) + high_pass(im2, sigma=sig2)
+</code></pre>
+            </details>
+            <details class="code-box">
+                <summary>high_pass</summary>
+                <pre><code>def high_pass(image, sigma=0):
+    return image - blur(image, sigma)
+</code></pre>
+            </details>
+            <details class="code-box">
+                <summary>blur</summary>
+                <pre><code>def blur(image, sigma):
+    kern_size = 2 * math.ceil(3 * sigma) + 1
+    k = cv2.getGaussianKernel(ksize=kern_size, sigma=sigma)
+    image = signal.convolve2d(image, k, mode='same', boundary='symm')
+    return signal.convolve2d(image, k.T, mode='same', boundary='symm')
+</code></pre>
+            </details>
 
             <h3 class="subsection-heading">Gaussian and Laplacian Stacks</h3>
             <div class="gallery-rows">
