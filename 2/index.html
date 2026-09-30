@@ -439,6 +439,141 @@
             </details>
 
             <h3 class="subsection-heading">Hybrid Images</h3>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">Using the high and low frequency techniques from above, I was able to create
+                    'hybrid images' that appear like one thing close up and another from afar. This is possible because
+                    from up close, humans are quite good at percieving high frequency information, whereas from far away
+                    they tend to only register low frequency information. By stacking the high frquency information from
+                    one image on top of the low frequency information for another, we create an effect where an image looks
+                    completley different from different distances. Here is an example where we take the high frequency information
+                    from a picture of a cat and overlay it with the low frequency information from the picture of a man.</p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./part2/nutmeg.jpg" alt="Original nutmeg image">
+                        <figcaption>Original image of Nutmeg</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/DerekPicture.jpg" alt="Original Derek image">
+                        <figcaption>Original image of Derek</figcaption>
+                    </figure>
+                </div>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid1_high.jpg" alt="High frequency image">
+                        <figcaption>Aligned image of Nutmeg</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid1_low.jpg" alt="Low frequency image">
+                        <figcaption>Aligned image of Derek</figcaption>
+                    </figure>
+                </div>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid1.jpg" alt="Hybrid image">
+                        <figcaption>Hybrid image</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid1_cropped.jpg" alt="Hybrid image cropped">
+                        <figcaption>Hybrid image (cropped)</figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">Let's dive a little deeper on these images of animated and live action Maui.
+                    I want to create an image that looks like live action up close but appears animated from far away. These
+                    are the original images I'm using as well as their cropped and scaled versions that I will be combining.
+                </p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./part2/maui_live.jpg" alt="Original live-action Maui image">
+                        <figcaption>Original image of live-action Maui</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/maui_animated.webp" alt="Original animated Maui image">
+                        <figcaption>Original image of animated Maui</figcaption>
+                    </figure>
+                </div>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid2_high.jpg" alt="Aligned live-action Maui image">
+                        <figcaption>Aligned image of live-action Maui</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid2_low.jpg" alt="Aligned animated Maui image">
+                        <figcaption>Aligned image of animated Maui</figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">To make the hybrid image, I need a low pass version of the animated image and a high pass
+                    of the live action one. Finding the right sigma for the gaussian kernel used to blur these images is important; if
+                    the low pass image uses too small a sigma, it retains some high frequency details that are visible from up close, but
+                    if the sigma is too large it creates an image too blurry to identify even at a distance. Similarly, if the sigma is
+                    too low on the high pass image, it retains some low pass information that's visible from afar, but if it's too high
+                    it reduces the image's legability even from close up. After some expirimentation, I landed on a sigma of 10 for the low
+                    pass and 3 for the high pass. These were the resulting images.
+                </p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./part2/live_highpass.jpg" alt="High pass live-action Maui image">
+                        <figcaption>high_pass(live_im, 3=sig2)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/animated_lowpass.jpg" alt="Low pass animated Maui image">
+                        <figcaption>blur(animated_im, 10)</figcaption>
+                    </figure>
+                </div>
+                <figure class="featured-image">
+                    <img src="./part2/hybrid2.jpg" alt="Hybrid image 2">
+                    <figcaption>Hybrid image</figcaption>
+                </figure>
+                <figure class="size-slider">
+                    <div class="size-slider__stage" style="aspect-ratio: 600 / 680;">
+                        <img class="size-slider__image" src="./part2/hybrid2.jpg" alt="Hybrid image 2 at adjustable size">
+                    </div>
+                    <input class="size-slider__range" type="range" min="5" max="100" value="100" aria-label="Image size">
+                    <figcaption>Drag the slider to shrink the image and simulate viewing it from farther away:
+                        <span class="size-slider__value">100%</span></figcaption>
+                </figure>
+                <div class="image-gallery image-gallery--fifths">
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid2_low.jpg" alt="Aligned animated Maui">
+                        <figcaption>Aligned animated</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid2_high.jpg" alt="Aligned live-action Maui">
+                        <figcaption>Aligned live action</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/animated_lowpass.jpg" alt="Low pass animated Maui">
+                        <figcaption>Low pass animated</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/live_highpass.jpg" alt="High pass live-action Maui">
+                        <figcaption>High pass live action</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid2.jpg" alt="Hybrid image">
+                        <figcaption>Hybrid</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/animated_aligned_fft.jpg" alt="Fourier transform of aligned animated Maui">
+                        <figcaption>Fourier transform</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/live_aligned_fft.jpg" alt="Fourier transform of aligned live-action Maui">
+                        <figcaption>Fourier transform</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/animated_lowpass_fft.jpg" alt="Fourier transform of low pass animated Maui">
+                        <figcaption>Fourier transform</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/live_highpass_fft.jpg" alt="Fourier transform of high pass live-action Maui">
+                        <figcaption>Fourier transform</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/hybrid_fft.jpg" alt="Fourier transform of hybrid image">
+                        <figcaption>Fourier transform</figcaption>
+                    </figure>
+                </div>
+            </div>
 
             <h3 class="subsection-heading">Gaussian and Laplacian Stacks</h3>
             <div class="gallery-rows">
@@ -781,5 +916,6 @@
     <script src="../compare-slider.js"></script>
     <script src="../code-popup.js"></script>
     <script src="../image-switcher.js"></script>
+    <script src="../size-slider.js"></script>
 </body>
 </html>
