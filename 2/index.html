@@ -35,10 +35,10 @@
                 </div>
                 <p class="analysis-textbox">While these images all look the same, they were generated using different
                 code. All of them convolve the selfie with a 9x9 pixel box filter, but the first two were convolutions
-                implemented by me while the third was done using a standard library, SciPy. The first image was convolved
-                using four nested for loops and the second one using two. As the image processing times shown in each
-                image's caption show, reducing the nested for loops massively sped up the process. The library speeds it
-                up even more by utilizing vector operations to minimize the number of for loops even more.</p>
+                implemented by me, while the third was done using a standard library, SciPy. The first image was convolved
+                using four nested for loops and the second one using two. As the processing times in each image's caption
+                show, reducing the number of nested for loops massively sped up the process. The library speeds it up even
+                further by using vector operations to minimize the number of for loops.</p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
                         <img src="./part1/selfie_4.jpg" alt="4 for loops">
@@ -64,9 +64,9 @@
                 </div>
                 <p class="analysis-textbox">These images are also the result of convolving the selfie, though not with a box
                     filter but rather a derivative filter. The first finds derivatives with respect to x and the second with
-                    respect to y. These "partial derivative" images locate vertivle and horizontal edges by taking on extreme
-                    values in places where nearby horizontal/verticle pixels have very different values. These derivative
-                    being very useful in computing the "gradient magnitude" (or "edge image"), as shown at the end.</p>
+                    respect to y. These "partial derivative" images locate vertical and horizontal edges by taking on extreme
+                    values in places where nearby horizontal/vertical pixels have very different values. These derivatives
+                    are very useful in computing the "gradient magnitude" (or "edge image"), as shown at the end.</p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
                         <img src="./part1/selfie_dx.jpg" alt="dx">
@@ -78,7 +78,7 @@
                     </figure>
                     <figure class="gallery-item">
                         <img src="./part1/selfie_gm.jpg" alt="gm">
-                        <figcaption>Implementation discussed in next section</figcaption>
+                        <figcaption>Implementation discussed in the next section</figcaption>
                     </figure>
                 </div>
             </div>
@@ -137,18 +137,18 @@
             <h3 class="subsection-heading">Gradient Magnitude</h3>
             <div class="gallery-rows">
                 <p class="analysis-textbox">In this section, I built on the strategies of the last section to isolate the 
-                    edges of an image. This image below is the original.</p>
+                    edges of an image. The image below is the original.</p>
                 <figure class="featured-image">
-                    <img src="./part1/cameraman.jpg" alt="OG camerman">
+                    <img src="./part1/cameraman.jpg" alt="OG cameraman">
                     <figcaption>OG cameraman</figcaption>
                 </figure>
                 <p class="analysis-textbox">As above, I created "partial derivative" images. The first is the partial derivative
-                    with respect to x, which can be loosely thought of as the verticle edge finder. The second is the partial
-                    derivative with respect to y, which can be loosely thought of the horizontal edge finder.
+                    with respect to x, which can be loosely thought of as the vertical edge finder. The second is the partial
+                    derivative with respect to y, which can be loosely thought of as the horizontal edge finder.
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
-                        <img src="./part1/cam_dx.jpg" alt="camerman dx">
+                        <img src="./part1/cam_dx.jpg" alt="cameraman dx">
                         <figcaption>signal.convolve2d(image, np.array([[1, 0, -1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
                     </figure>
                     <figure class="gallery-item">
@@ -156,9 +156,9 @@
                         <figcaption>signal.convolve2d(image, np.array([[1], [0], [-1]]), mode='same', boundary='fill', fillvalue=0)</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox">Finally, I combined these partial derivative into one image, called the gradient
-                    magnitude image because the brightness of each pixel in the gradient magntiude represents the amplitude of
-                    the gradient of the corresponding pixel in the original image. This is found by taking the square root of the
+                <p class="analysis-textbox">Finally, I combined these partial derivatives into one image, called the gradient
+                    magnitude image, because the brightness of each pixel in the gradient magnitude represents the amplitude of
+                    the gradient at the corresponding pixel in the original image. This is found by taking the square root of the
                     sum of the squares of the pixel values from the partial derivative images.
                 </p>
                 <div class="image-text-row">
@@ -168,8 +168,8 @@
                     </figure>
                     <p class="analysis-textbox">The image on the left is the raw gradient magnitude. In it, values can be shades of
                         gray corresponding to gradient changes not caused by edges. To fix this, I set all the pixels in the image
-                        to either black or white. Pixels that were greater than 30% bright were made white and all other pixels were
-                        made black, creating the image on the right that corresponds much more to the true edges in the image.
+                        to either black or white. Pixels brighter than 30% were made white and all other pixels were made black,
+                        creating the image on the right, which corresponds much more closely to the true edges in the image.
                     </p>
                     <figure class="gallery-item">
                         <img src="./part1/cam_gm_0.3.jpg" alt="cameraman binary gradient magnitude">
@@ -197,9 +197,9 @@
                     </div>
                     <p>There is no perfect answer. Because of the nature of gradients, things that we don't consider
                         edges will sometimes have a higher value than things that we do, so it's impossible to perfectly
-                        cut out all the nonedges while keeping all the edges. I chose 30% because I felt it did the best
-                        to balance these. Looking at the images above, it felt like there was too much texture in the
-                        grass at 25%. Similarly, I felt too many edges were missing at 50%.
+                        cut out all the non-edges while keeping all the edges. I chose 30% because I felt it best
+                        balanced these. Looking at the images above, I felt there was too much texture in the grass
+                        at 25%. Similarly, I felt too many edges were missing at 50%.
                     </p>
                 </div>
             </details>
@@ -225,12 +225,12 @@
             <h3 class="subsection-heading">Blur + Gradient Magnitude</h3>
             <div class="gallery-rows">
                 <p class="analysis-textbox">To attempt to isolate the edges even better, I then blurred the image
-                    by convolving it with a 9x9 box filter before finding the gradient magnitude. This ends up
+                    by convolving it with a 9x9 Gaussian filter before finding the gradient magnitude. This ends up
                     reducing the gradient in areas like the grass, where blurring creates a more uniform region
-                    with less gradient spikes caused by texture. It preserves the true edges, because even after
-                    being blurred these areas maintain a sharp change in brightness (even if it is <i>slightly</i> less
-                    sharp). As the gradients of the nonedges was reduces, the sensitivity could be upped to 14% brightness
-                    while still picking up less nonedge pixels than before.</p>
+                    with fewer gradient spikes caused by texture. It preserves the true edges because, even after
+                    being blurred, these areas maintain a sharp change in brightness (even if it is <i>slightly</i> less
+                    sharp). As the gradients of the non-edges were reduced, the threshold could be lowered to 14% brightness
+                    while still picking up fewer non-edge pixels than before.</p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
                         <img src="./part1/cam_blur2_gm.jpg" alt="blur2">
@@ -256,8 +256,8 @@
                         <figcaption>smooth_gradiant_magnitude(image)[1]</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox">Then, using these filters and convolving with the original image I produced
-                    the partial derivative images. Combining them in the same way as before, I got the following images. 
+                <p class="analysis-textbox">Then, by convolving the original image with these filters, I produced the
+                    partial derivative images. Combining them in the same way as before, I got the following images.
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
@@ -308,19 +308,19 @@
 
             <h3 class="subsection-heading">Sharpening</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox">In this section, I build upon the strategies shown in the last
+                <p class="analysis-textbox">In this section, I build upon the strategies shown in the last section
                     to sharpen blurry images. I will show the complete process using the image of the Taj Mahal shown
                     below, as well as the start and end products of a few more examples.</p>
                 <figure class="featured-image">
                     <img src="./part2/taj_og.jpg" alt="OG taj">
                     <figcaption>Original image</figcaption>
                 </figure>
-                <p class="analysis-textbox">A blurry image often appears sharper if it contains more high frequency information.
-                    In the last section, I showed how convolving an image with a guassian filter can produce a blurry image. This
-                    process actually preserves the low frequency information of an image (e.g. general shapes, colors) while reducing
-                    the high frequency information (details). To isolate just the high frequency information, we can subtract the low
-                    frequncy version from the original image. We can then add more high frequency strength to our original image by
-                    adding the isolated high frequcy image to the original. Although my final version does this in one step, the images
+                <p class="analysis-textbox">A blurry image often appears sharper if it contains more high-frequency information.
+                    In the last section, I showed how convolving an image with a Gaussian filter can produce a blurry image. This
+                    process actually preserves the low-frequency information of an image (e.g., general shapes and colors) while reducing
+                    the high-frequency information (details). To isolate just the high-frequency information, we can subtract the
+                    low-frequency version from the original image. We can then add more high-frequency strength to our original image by
+                    adding the isolated high-frequency image to the original. Although my final version does this in one step, the images
                     below show the approximate steps of the process.
                 </p>
                 <div class="image-gallery image-gallery--thirds">
@@ -337,10 +337,10 @@
                         <figcaption>Sharpened</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox">Once we have the isolated high frequency image, it's easy to adjust how much
-                    we add into the original image. The formula for creating the final image from the original and the high
-                    frequency is just: result = original + alpha * high-frequency where alpha is how much we choose to add. Here
-                    are the results for a handful of differernt values of alpha.
+                <p class="analysis-textbox">Once we have the isolated high-frequency image, it's easy to adjust how much of it
+                    we add to the original image. The formula for creating the final image from the original and the high-frequency
+                    image is just: result = original + alpha * high-frequency, where alpha is how much we choose to add. Here
+                    are the results for a handful of different values of alpha.
                 </p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
@@ -356,9 +356,6 @@
                         <figcaption>color_unmask(im, alpha=2)</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox">To make this entire process possible by only convolving the original image with
-                    a signle kernel is easy. Since the formula is output = input - i
-                </p>
                 <figure class="compare-slider">
                     <div class="compare-slider__frame">
                         <img class="compare-slider__base" src="./part2/taj_1.jpg" alt="Sharpened Taj Mahal">
@@ -372,7 +369,7 @@
                     <figcaption>Drag the slider to compare the original and sharpened images (alpha = 1 for sharpened)</figcaption>
                 </figure>
                 <p class="analysis-textbox">This is how it looks on two images I selected. In the first, it greatly reduces
-                    the blur by using a huge alpha value. In the second, the more modest alpha value is able to subtley add
+                    the blur by using a huge alpha value. In the second, the more modest alpha value is able to subtly add
                     some texture to the stone structures.
                 </p>
                 <div class="image-gallery comparison-gallery">
@@ -395,12 +392,12 @@
                         <figcaption>Sharpened (alpha = 5)</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox">While this strategy can make the high frequency details of an image easier to
-                    spot, they can't create details that weren't there. For this reason, if we take a detailed image and
-                    blur it, when we attempt to recreate the original image using only the blurred one we get a much
-                    lower quality image. This is because the original low pass filter that blurred it permanently destroyed
-                    high frequency information about the image. The sharpening technique can enhance the surviving high
-                    frequency information, but it cannot recreate what was lost.</p>
+                <p class="analysis-textbox">While this strategy can make the high-frequency details of an image easier to
+                    spot, it can't create details that weren't there. For this reason, if we take a detailed image, blur it,
+                    and then attempt to recreate the original image using only the blurred one, we get a much
+                    lower-quality image. This is because the original low-pass filter that blurred it permanently destroyed
+                    high-frequency information about the image. The sharpening technique can enhance the surviving
+                    high-frequency information, but it cannot recreate what was lost.</p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
                         <img src="./part2/blur_unmaskA.jpg" alt="Moon og">
@@ -440,13 +437,13 @@
 
             <h3 class="subsection-heading">Hybrid Images</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox">Using the high and low frequency techniques from above, I was able to create
-                    'hybrid images' that appear like one thing close up and another from afar. This is possible because
-                    from up close, humans are quite good at percieving high frequency information, whereas from far away
-                    they tend to only register low frequency information. By stacking the high frquency information from
-                    one image on top of the low frequency information for another, we create an effect where an image looks
-                    completley different from different distances. Here is an example where we take the high frequency information
-                    from a picture of a cat and overlay it with the low frequency information from the picture of a man.</p>
+                <p class="analysis-textbox">Using the high- and low-frequency techniques from above, I was able to create
+                    'hybrid images' that look like one thing up close and another from afar. This is possible because
+                    from up close, humans are quite good at perceiving high-frequency information, whereas from far away
+                    they tend to register only low-frequency information. By stacking the high-frequency information from
+                    one image on top of the low-frequency information of another, we create an effect where an image looks
+                    completely different from different distances. Here is an example where we take the high-frequency information
+                    from a picture of a cat and overlay it on the low-frequency information from a picture of a man.</p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
                         <img src="./part2/nutmeg.jpg" alt="Original nutmeg image">
@@ -477,9 +474,9 @@
                         <figcaption>Hybrid image (cropped)</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox">Let's dive a little deeper on these images of animated and live action Maui.
+                <p class="analysis-textbox">Let's dive a little deeper into these images of animated and live-action Maui.
                     I want to create an image that looks like live action up close but appears animated from far away. These
-                    are the original images I'm using as well as their cropped and scaled versions that I will be combining.
+                    are the original images I'm using, as well as their cropped and scaled versions that I will be combining.
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
@@ -539,13 +536,13 @@
                     <figcaption>Drag the slider to shrink the image and simulate viewing it from farther away:
                         <span class="size-slider__value">100%</span></figcaption>
                 </figure>
-                <p class="analysis-textbox">Looking at the Fourier Transforms of these images helps us see what's going
-                    on. The original images have fairly usual graphs; a spread of energy across the high and low frequencies
-                    with a huge spike at the low frequencies in the very center. The low pass image isolates just that spike
-                    in the center while the high pass removes it and retains everything else. The hybrid image combines the spike
-                    in the low frequencies from the animated image with the rest of the graph from the live action image. This makes
-                    sense as the image itself contains the low frequency version of the animated image and the high frequency version
-                    of the live action image.</p>
+                <p class="analysis-textbox">Looking at the Fourier transforms of these images helps us see what's going
+                    on. The original images have fairly typical graphs: a spread of energy across the high and low frequencies
+                    with a huge spike at the low frequencies in the very center. The low-pass image isolates just that spike
+                    in the center, while the high-pass image removes it and retains everything else. The hybrid image combines the spike
+                    in the low frequencies from the animated image with the rest of the graph from the live-action image. This makes
+                    sense, as the image itself contains the low-frequency version of the animated image and the high-frequency version
+                    of the live-action image.</p>
                 <div class="image-gallery image-gallery--fifths">
                     <figure class="gallery-item">
                         <img src="./part2/hybrid2_low.jpg" alt="Aligned animated Maui">
@@ -557,11 +554,11 @@
                     </figure>
                     <figure class="gallery-item">
                         <img src="./part2/animated_lowpass.jpg" alt="Low pass animated Maui">
-                        <figcaption>Low pass animated</figcaption>
+                        <figcaption>Low-pass animated</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./part2/live_highpass.jpg" alt="High pass live-action Maui">
-                        <figcaption>High pass live action</figcaption>
+                        <figcaption>High-pass live action</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./part2/hybrid2.jpg" alt="Hybrid image">
@@ -629,15 +626,15 @@
 
             <h3 class="subsection-heading">Gaussian and Laplacian Stacks</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox">This is a Laplacian stack, which is similar to a Guassian stack except that
+                <p class="analysis-textbox">This is a Laplacian stack, which is similar to a Gaussian stack except that
                     it isolates individual frequencies instead of just progressively reducing frequencies. To create each
-                    element in the stack, the corresponding element in the Guassian stack is taken and the next image
+                    element in the stack, the corresponding element in the Gaussian stack is taken and the next image
                     in the Gaussian stack is subtracted from it. This isolates a frequency band because all of the higher
-                    frequencies are already removed when starting with a Guassian convolution of the original image and
-                    all the lower frequencies are removed by subtracted the next Guassian, which contains only lower
-                    frequencies. The high, medium, and low frequencies of the apple, orange and combined images can be
-                    seen below. The original images are at the bottom and the high, medium and low frequencies are on the
-                    first, second and third rows respectively. Right now, the oraple is just a sum of the orange and apple
+                    frequencies have already been removed by starting with a Gaussian convolution of the original image, and
+                    all the lower frequencies are removed by subtracting the next Gaussian, which contains only lower
+                    frequencies. The high, medium, and low frequencies of the apple, orange, and combined images can be
+                    seen below. The original images are at the bottom, and the high, medium, and low frequencies are in the
+                    first, second, and third rows, respectively. Right now, the oraple is just a sum of the orange and apple
                     images, but that will be refined in the next section.</p>
                 <div class="image-gallery image-gallery--thirds image-gallery--compact">
                     <figure class="gallery-item">
@@ -787,12 +784,12 @@
             <h3 class="subsection-heading">Multiresolution Blending</h3>
             <div class="gallery-rows">
                 <p class="analysis-textbox">Utilizing these stacks, it is possible to smoothly blend images without creating
-                    a seam. To do so, it is necessaray to blend each level of each image's respective laplacian pyramid at a
-                    different level. If high frequency details are blended with a large overlap zone, there will be conflicting
-                    fine details in the overlap zone that look poor together. However, if low frequency information is blended
+                    a seam. To do so, it is necessary to blend each level of each image's respective Laplacian pyramid
+                    differently. If high-frequency details are blended over a large overlap zone, there will be conflicting
+                    fine details in the overlap zone that look poor together. However, if low-frequency information is blended
                     over a small overlap zone, an obvious seam will appear where shapes and colors drastically change. To solve
-                    this, I created a corresponding mask that is blurred to a level fitting the frequcy of the images at the
-                    same level. The result of combining different levels of the pyramid across this mask is shown below.</p>
+                    this, I created a corresponding mask for each level that is blurred to fit the frequency of the images at
+                    that level. The result of combining different levels of the pyramid across this mask is shown below.</p>
                 <div class="image-switcher">
                     <div class="image-switcher__panel image-gallery comparison-gallery image-gallery--compact" data-panel="original">
                         <figure class="gallery-item">
@@ -815,15 +812,15 @@
                     <div class="image-switcher__panel image-gallery comparison-gallery image-gallery--compact" data-panel="level0" hidden>
                         <figure class="gallery-item">
                             <img src="./part2/apple2_high.jpg" alt="Placeholder image">
-                            <figcaption>Apple laplacian stack at index 0 (high frequency)</figcaption>
+                            <figcaption>Apple Laplacian stack at index 0 (high frequency)</figcaption>
                         </figure>
                         <figure class="gallery-item">
                             <img src="./part2/orange2_high.jpg" alt="Placeholder image">
-                            <figcaption>Orange laplacian stack at index 0 (high frequency)</figcaption>
+                            <figcaption>Orange Laplacian stack at index 0 (high frequency)</figcaption>
                         </figure>
                         <figure class="gallery-item">
                             <img src="./part2/mask_high.jpg" alt="Placeholder image">
-                            <figcaption>Mask guassian stack at index 0</figcaption>
+                            <figcaption>Mask Gaussian stack at index 0</figcaption>
                         </figure>
                         <figure class="gallery-item">
                             <img src="./part2/combo0.jpg" alt="Placeholder image">
@@ -833,15 +830,15 @@
                     <div class="image-switcher__panel image-gallery comparison-gallery image-gallery--compact" data-panel="level2" hidden>
                         <figure class="gallery-item">
                             <img src="./part2/apple2_med.jpg" alt="Placeholder image">
-                            <figcaption>Apple laplacian stack at index 2 (medium frequency)</figcaption>
+                            <figcaption>Apple Laplacian stack at index 2 (medium frequency)</figcaption>
                         </figure>
                         <figure class="gallery-item">
                             <img src="./part2/orange2_med.jpg" alt="Placeholder image">
-                            <figcaption>Orange laplacian stack at index 2 (medium frequency)</figcaption>
+                            <figcaption>Orange Laplacian stack at index 2 (medium frequency)</figcaption>
                         </figure>
                         <figure class="gallery-item">
                             <img src="./part2/mask_med.jpg" alt="Placeholder image">
-                            <figcaption>Mask guassian stack at index 2</figcaption>
+                            <figcaption>Mask Gaussian stack at index 2</figcaption>
                         </figure>
                         <figure class="gallery-item">
                             <img src="./part2/combo2.jpg" alt="Placeholder image">
@@ -851,15 +848,15 @@
                     <div class="image-switcher__panel image-gallery comparison-gallery image-gallery--compact" data-panel="level4" hidden>
                         <figure class="gallery-item">
                             <img src="./part2/apple2_low.jpg" alt="Placeholder image">
-                            <figcaption>Apple laplacian stack at index 4 (low frequency)</figcaption>
+                            <figcaption>Apple Laplacian stack at index 4 (low frequency)</figcaption>
                         </figure>
                         <figure class="gallery-item">
                             <img src="./part2/orange2_low.jpg" alt="Placeholder image">
-                            <figcaption>Orange laplacian stack at index 4 (low frequency)</figcaption>
+                            <figcaption>Orange Laplacian stack at index 4 (low frequency)</figcaption>
                         </figure>
                         <figure class="gallery-item">
                             <img src="./part2/mask_low.jpg" alt="Placeholder image">
-                            <figcaption>Mask guassian stack at index 4</figcaption>
+                            <figcaption>Mask Gaussian stack at index 4</figcaption>
                         </figure>
                         <figure class="gallery-item">
                             <img src="./part2/combo4.jpg" alt="Placeholder image">
@@ -873,14 +870,14 @@
                         <button type="button" class="image-switcher__button" data-panel="level4" aria-pressed="false">level 4</button>
                     </div>
                 </div>
-                <p class="analysis-textbox">That process creates a laplacian stack of combined images. To obtain our final image,
-                    we only have to reverse the laplacian stacking process to obtain our combined image. This is possible because
-                    each element in the stack summed with the image one layer down in the gaussian stack produces the next image
-                    in the gaussian stack. Since the last image in the laplacian stack is equal to the last image in the gaussian
-                    stack, we can add the second to last laplacian layer to the last gaussian layer to produce the second to last
-                    gaussian layer. We can add this to the next laplacian layer to get to the next gaussian layer up. We can repeat
-                    this process to move up the guassian stack until we get to the very top, which is the original image! Using this
-                    process on our combined laplacian stack produces the following image, efficiently blending the apple and orange.
+                <p class="analysis-textbox">That process creates a Laplacian stack of combined images. To obtain our final image,
+                    we only have to reverse the Laplacian stacking process. This is possible because each element in the Laplacian
+                    stack, summed with the image one layer down in the Gaussian stack, produces the next image up in the Gaussian
+                    stack. Since the last image in the Laplacian stack is equal to the last image in the Gaussian stack, we can add
+                    the second-to-last Laplacian layer to the last Gaussian layer to produce the second-to-last Gaussian layer. We
+                    can add this to the next Laplacian layer to get to the next Gaussian layer up. We can repeat this process to
+                    move up the Gaussian stack until we get to the very top, which is the original image! Using this process on our
+                    combined Laplacian stack produces the following image, efficiently blending the apple and orange.
                 </p>
                 <figure class="featured-image">
                     <img src="./part2/orapple_final.jpg" alt="Placeholder image">
@@ -923,7 +920,7 @@
 
             <h3 class="subsection-heading">My own examples</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox">Here are a couple of examples using different images. In each example the
+                <p class="analysis-textbox">Here are a couple of examples using different images. In each example, the
                     first image corresponds to the white part of the mask and the second to the black. The final product
                     is shown below the original images and mask.
                 </p>
