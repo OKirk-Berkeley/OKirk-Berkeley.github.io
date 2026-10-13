@@ -626,7 +626,57 @@
 
             <h3 class="subsection-heading">Gaussian and Laplacian Stacks</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox">This is a Laplacian stack, which is similar to a Gaussian stack except that
+                <p class="analysis-textbox">A Gaussian stack is a series of progressively blurrier copies of an image, all
+                    kept at the original size. The first layer is the original image. Each following layer is made by
+                    blurring the previous layer with a Gaussian filter, starting with a sigma of 2 and doubling the sigma at
+                    every layer. Because each blur acts as a low-pass filter, every layer keeps fewer of the high-frequency
+                    details than the one before it, leaving only the broader shapes and colors. Below are layers 0, 2, and 4
+                    of a five-layer Gaussian stack for the apple and orange images.</p>
+                <div class="image-gallery image-gallery--thirds image-gallery--compact">
+                    <figure class="gallery-item">
+                        <img src="./part2/apple_gauss0.jpg" alt="Apple Gaussian stack layer 0">
+                        <figcaption>
+                            <span class="caption-line">Layer 0 (original)</span>
+                            <span class="caption-line">guassian_stack(apple_im, layers=5)[0]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/apple_gauss2.jpg" alt="Apple Gaussian stack layer 2">
+                        <figcaption>
+                            <span class="caption-line">Layer 2</span>
+                            <span class="caption-line">guassian_stack(apple_im, layers=5)[2]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/apple_gauss4.jpg" alt="Apple Gaussian stack layer 4">
+                        <figcaption>
+                            <span class="caption-line">Layer 4</span>
+                            <span class="caption-line">guassian_stack(apple_im, layers=5)[4]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orange_gauss0.jpg" alt="Orange Gaussian stack layer 0">
+                        <figcaption>
+                            <span class="caption-line">Layer 0 (original)</span>
+                            <span class="caption-line">guassian_stack(orange_im, layers=5)[0]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orange_gauss2.jpg" alt="Orange Gaussian stack layer 2">
+                        <figcaption>
+                            <span class="caption-line">Layer 2</span>
+                            <span class="caption-line">guassian_stack(orange_im, layers=5)[2]</span>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./part2/orange_gauss4.jpg" alt="Orange Gaussian stack layer 4">
+                        <figcaption>
+                            <span class="caption-line">Layer 4</span>
+                            <span class="caption-line">guassian_stack(orange_im, layers=5)[4]</span>
+                        </figcaption>
+                    </figure>
+                </div>
+                <p class="analysis-textbox">Next is a Laplacian stack, which is similar to a Gaussian stack except that
                     it isolates individual frequencies instead of just progressively reducing frequencies. To create each
                     element in the stack, the corresponding element in the Gaussian stack is taken and the next image
                     in the Gaussian stack is subtracted from it. This isolates a frequency band because all of the higher
@@ -772,6 +822,16 @@
         ret[i] = image
         sigma = sigma * 2
     return ret
+</code></pre>
+            </details>
+            <details class="code-box">
+                <summary>guassian_stack</summary>
+                <pre><code>def guassian_stack(image, layers=4):
+    r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
+    r = guassian_stack_gray(r, layers)
+    g = guassian_stack_gray(g, layers)
+    b = guassian_stack_gray(b, layers)
+    return np.stack([r, g, b], axis=-1)
 </code></pre>
             </details>
             <details class="code-box">
