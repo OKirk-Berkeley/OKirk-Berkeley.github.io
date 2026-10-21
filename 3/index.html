@@ -79,13 +79,12 @@
         </nav>
 
         <div class="gallery-rows" id="part-a">
-            <p class="analysis-textbox"><strong>To write:</strong> A short introduction to Part A. Explain that this
-                part uses the pretrained PixNerd text-to-image flow model (512x512 outputs) to generate and edit images
-                without any training. Briefly recap flow matching: the linear interpolation
-                x<sub>t</sub> = (1 - t)x<sub>0</sub> + t x<sub>1</sub> between noise (t = 0) and a clean image (t = 1),
-                and that the model predicts the velocity x<sub>1</sub> - x<sub>0</sub>, which is integrated from noise
-                to an image at sampling time. Mention the three sections: visualizing training and sampling,
-                conditional generation with guidance, and creative applications.</p>
+            <p class="analysis-textbox">In part A, I explore what kind of things are possible using a trained
+            image denoising model. I don't do any of my own model training until part B. Many of the techniques
+            in this part rely on often critiqued (and rightly so) aspect of AI - its ability to hallucinate. If
+            we pass a model that has been trained to denoise an image an input that is pure noise, it will "hallucinate"
+            that it has been passed a natural image with noise added, and actually recover this "hallucinated" image!
+            This part of the part of the project explores how we can harness this to create meaningful images.</p>
         </div>
 
         <section class="gallery-section">
@@ -93,12 +92,15 @@
 
             <h3 class="subsection-heading" id="a-1-1">1.1 Constructing Noisy Training Inputs</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Introduce the image you chose for Sections
-                    1.1&ndash;1.5 and how it was preprocessed (center-cropped, resized to 512x512, RGB scaled to
-                    [-1, 1]). Explain the forward process x<sub>t</sub> = (1 - t)&epsilon; + t x<sub>1</sub> and how
-                    your <code>interpolate</code> function implements it. Note that it scales the image rather than
-                    just adding noise, that a single noise sample &epsilon; was reused for every t, and that larger t
-                    keeps more of the image (t = 0 is pure noise, t = 1 is the clean image).</p>
+                <p class="analysis-textbox">The building block for this style of image generation is noisy images.
+                Models capable of estimating original images from noisy recreations are trained on natural images and their
+                corresponding noisy counterparts.
+
+                Generating such images is simple. At any given noise level t, every pixel in our noisy image (x<sub>t</sub>) is 
+                a weighted average of the corresponding pixel value in our input image and pure Gaussian noise (&epsilon;). The
+                equation is given by x<sub>t</sub> = t * x<sub>1</sub> + (1 - t) * &epsilon;. Here are examples of a clean image
+                (on the left) and its noisy counterparts at t values of 0.25, 0.5, and 0.75.
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/training_inputs.jpg" alt="Original image and noisy versions at t = 0.25, 0.5, and 0.75">
                     <figcaption>Original image followed by noisy inputs at t = 0.25, 0.50, and 0.75</figcaption>
@@ -107,11 +109,15 @@
 
             <h3 class="subsection-heading" id="a-1-2">1.2 Classical Denoising</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain the Gaussian blur baseline: divide
-                    x<sub>t</sub> by t to restore the image amplitude, then blur to average out the independent noise.
-                    Describe how you picked the best sigma for each noise level (8, 2, and 1 for t = 0.25, 0.50, 0.75)
-                    and the trade-off between removing noise and destroying detail. Comment on how the results get
-                    worse as the noise level increases, especially at t = 0.25.</p>
+                <p class="analysis-textbox">One way to try to correct the noise is by making the value of each output pixel
+                    an average of its neighbors. Since the noise has a mean value of 0, we expect it to cancel out when summed
+                    across multiple values, leaving just the original pixel values. This can be done using a Guassin blur on the
+                    noisy image (although for best results the noisy image should be divided by t first to reproduce an output
+                    image of the same amplitude as the input). However, the Gaussian blur also removes fine details from our image.
+                    The noisier the input, the more pixels have to be averaged to get a reliable output and the blurrier the output
+                    becomes. Results using this denoising method are shown below. Note how for noiser images a larger Gaussian blur
+                    kernel was needed, resulting in a blurrier output.
+                </p>
                 <figure class="featured-image featured-image--medium">
                     <img src="./results/blur_0.25.jpg" alt="Noisy input and Gaussian blur at t = 0.25">
                     <figcaption>t = 0.25: noisy input (left) and Gaussian-denoised result with sigma = 8 (right)</figcaption>
@@ -128,12 +134,14 @@
 
             <h3 class="subsection-heading" id="a-1-3">1.3 One-Step Denoising</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain how <code>one_step_denoise</code> uses
-                    the pretrained model: predict the velocity at (x<sub>t</sub>, t) with the prompt
-                    "a high quality photo", then extrapolate to the clean endpoint with
-                    x&#770;<sub>1</sub> = x<sub>t</sub> + (1 - t)v<sub>&theta;</sub>. Compare the estimates against the
-                    original and against Gaussian blur: which details are recovered, which are invented or smoothed
-                    away, and how quality changes with t.</p>
+                <p class="analysis-textbox">A better approach is to train a model to denoise the images for us. The model
+                    predicts a path (called a "velocity") from our noisy image to its clean counterpart. The original image
+                    can be recovered using this formula x<sub>1</sub> = x<sub>t</sub> + (1 - t) * v where v is the predicted
+                    velocity. Our velocity predictor takes 3 inputs: the noisy image, the value of t, and a text prompt describing
+                    the image we want it to produce a velocity towards. Below are the results of this denoising process at various
+                    noise levels, all using the text prompt "a high quality photo". Much better than the Gaussian blur, but even
+                    this tequnique produces images that don't look very real on high-noise inputs.
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/one_step_0.25.jpg" alt="Original, noisy input, and one-step estimate at t = 0.25">
                     <figcaption>t = 0.25: original, noisy input, and one-step estimate</figcaption>
@@ -150,12 +158,12 @@
 
             <h3 class="subsection-heading" id="a-1-4">1.4 Visualizing Velocity</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain what is being visualized: the update the
-                    model predicts, (1 - t)v&#770;<sub>t</sub>, versus the ground-truth update
-                    (1 - t)v<sub>gt</sub> = x<sub>1</sub> - x<sub>t</sub>, computed from the saved noise. Describe how
-                    the error heatmap is computed (per-pixel RMS across RGB, before any display scaling) and that all
-                    updates share one symmetric color scale with zero at middle gray, and all heatmaps share the same
-                    limits.</p>
+                <p class="analysis-textbox">Since we have the original image, we can calculate what our velocity should be by subtracting
+                    the noise from the original image. The corresponding image update is this velocity scaled by (1 - t), which is
+                    the same as the original image minus the noisy image. This makes sense because it is the value we want
+                    to add to our noisy image to recover the original. This objectively correct update is compared to
+                    our predicted updated at a variety of noise levels below. Also included is a heat map showing where the
+                    predicted and correct updates differ.</p>
                 <figure class="featured-image" style="max-width: 360px;">
                     <img src="./results/velocity_original.jpg" alt="Original image used for the velocity visualization">
                     <figcaption>Original image</figcaption>
@@ -172,28 +180,31 @@
                     <img src="./results/velocity_0.75.jpg" alt="Noisy image, predicted update, ground-truth update, and error at t = 0.75">
                     <figcaption>t = 0.75: noisy image, predicted update, ground-truth update, and error heatmap</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> Interpret the results. Point out that the
-                    predicted update looks like a clean, smooth image while the ground truth also contains the exact
-                    noise pattern, which the model cannot know. Note where the error is concentrated (edges, fine
-                    texture like the cheese strands) and how the overall error changes as t increases.</p>
+                <p class="analysis-textbox">At higher noise levels, the model struggles to accurately predict things like
+                    the texture of the bread or of the cheese. The true updates also contain exact imprints of the noise pattern,
+                    which our model doesn't know, so can't recreate.
+                </p>
             </div>
 
             <h3 class="subsection-heading" id="a-1-5">1.5 Iterative Denoising with Euler Sampling</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain why one step is inaccurate (the velocity
-                    changes along the path) and how <code>euler_sample</code> fixes it by repeatedly applying
-                    x<sub>t+h</sub> = x<sub>t</sub> + h v<sub>&theta;</sub>(x<sub>t</sub>, t, c) with h = 0.02,
-                    recomputing the velocity after every update and shortening the last step to end exactly at t = 1.
-                    Describe the constant-velocity sanity test you ran (including a start time that needs a shortened
-                    final step) and its result. State that the trajectory below starts from the saved t = 0.50 noisy
-                    image and runs 25 updates, shown every fifth step.</p>
+                <p class="analysis-textbox">To improve on this even more, we can slowly denoise the image using tiny steps.
+                    Since our denoising model is less accurate at higher noise levels, we don't have to denoise all at once.
+                    Instead, we can predict the velocity at the given noise level and only move the image a little in that direction.
+                    Then, we can predict the velocity again and move a little in the direction of the new velocity. The result of this
+                    process is shown below where the image was denoised over 25 steps. The partially denoised image is shown from every
+                    5th step with the corresponding t.
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/trajectory.jpg" alt="Euler denoising trajectory from t = 0.5 to t = 1.0">
                     <figcaption>Euler denoising trajectory: initial state at t = 0.50, every fifth update, and the final image at t = 1.00</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> Compare the four results below, all from the
-                    same t = 0.50 noisy input. Discuss how Euler sampling compares to one-step denoising (sharpness,
-                    detail, faithfulness to the original) and how both learned methods compare to Gaussian blur.</p>
+                <p class="analysis-textbox">Below is a comparison of all the denoising method on the same noisy input (with t-value
+                    0.5). The blurred image fails to eliminate all the noise while reducing image detail. The one-step denoiser is
+                    much better but still struggles to recrate the fine textures from the original image with only one chance to
+                    predict the velocity from a very noisy image. The Euler method is the best (although also the most computationally
+                    expensive), as it can refine its velocity predictions as the noise decreases.
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/comparison.jpg" alt="Original, Gaussian blur, one-step estimate, and Euler result">
                     <figcaption>Original, Gaussian blur, one-step estimate, and Euler denoising (all from t = 0.50)</figcaption>
@@ -202,31 +213,27 @@
 
             <h3 class="subsection-heading" id="a-1-6">1.6 Generating Images from Noise</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain that generation from scratch is the same
-                    Euler sampler started at t = 0 from pure Gaussian noise, using the prompt "a high quality photo"
-                    with no guidance. Report what you observe: the generic prompt strongly favors portraits of people,
-                    and many samples have distorted or missing faces and odd skin textures. Note the seeds used
-                    so the comparison with CFG in Section 2.1 is clear.</p>
+                <p class="analysis-textbox">This technique can be expanded to generate images. If instead of passing our Euler
+                    denoising method a noisy recreation of an image we pass it pure noise, it will still be capable of "denoising"
+                    our image. Now, instead of trying to recreate an altered input image, it is guided only by the textual prompt
+                    the denoiser is given. Although noticably imperfect, this simple technique is surprisingly capable of image
+                    generation from scratch! Here are a few examples.
+                </p>
                 <div class="image-gallery image-gallery--fifths">
                     <figure class="gallery-item">
                         <img src="./results/conditional_0.jpg" alt="My conditional sample 1">
-                        <figcaption>My sample 1</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./results/conditional_1.jpg" alt="My conditional sample 2">
-                        <figcaption>My sample 2</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./results/conditional_2.jpg" alt="My conditional sample 3">
-                        <figcaption>My sample 3</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./results/conditional_3.jpg" alt="My conditional sample 4">
-                        <figcaption>My sample 4</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./results/conditional_4.jpg" alt="My conditional sample 5">
-                        <figcaption>My sample 5</figcaption>
                     </figure>
                 </div>
                 <p>The panel below is a recreation of the conditional samples on the course website. My five samples above use the same technique, but a different starting noise image.</p>
@@ -242,31 +249,29 @@
 
             <h3 class="subsection-heading" id="a-2-1">2.1 Classifier-Free Guidance (CFG)</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain classifier-free guidance: evaluate the
-                    model at the same x<sub>t</sub> and t with the prompt (v<sub>c</sub>) and with the empty prompt
-                    (v<sub>u</sub>), then combine them as v<sub>cfg</sub> = v<sub>c</sub> + w(v<sub>c</sub> -
-                    v<sub>u</sub>) with w = 7 and h = 0.02. Mention your check that w = 0 reproduces the plain
-                    conditional prediction.</p>
+                <p class="analysis-textbox">With no original image, it makes sense to strengthen the impact of our
+                    textual prompt. This can be done through classifier-free guidance (CFG). We can isolate the aspects
+                    of our velocity that relate to our text prompt by subtracting a velocity generated without a text prompt
+                    from our calculated velocity. We can then add these isolated aspects back into our final velocity to strengthen
+                    them. The final equation is v<sub>CFG</sub> = v<sub>text</sub> + w * (v<sub>text</sub> - v<sub>no text</sub>)
+                    where w is how strongly we add to increase these elements. Here are results using w = 7 and prompt "a high quality
+                    photo".
+                </p>
                 <div class="image-gallery image-gallery--fifths">
                     <figure class="gallery-item">
                         <img src="./results/cfg_0.jpg" alt="My CFG sample 1">
-                        <figcaption>My sample 1, w = 7</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./results/cfg_1.jpg" alt="My CFG sample 2">
-                        <figcaption>My sample 2, w = 7</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./results/cfg_2.jpg" alt="My CFG sample 3">
-                        <figcaption>My sample 3, w = 7</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./results/cfg_3.jpg" alt="My CFG sample 4">
-                        <figcaption>My sample 4, w = 7</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./results/cfg_4.jpg" alt="My CFG sample 5">
-                        <figcaption>My sample 5, w = 7</figcaption>
                     </figure>
                 </div>
                 <p>The panel below is a recreation of the classifier-free guidance samples on the course website. My five samples above use the same technique, but a different starting noise image.</p>
@@ -274,10 +279,7 @@
                     <img src="./results/cfg_samples_class.jpg" alt="Recreation of the course website's CFG samples, seeds 180 through 184 at guidance weight 7">
                     <figcaption>Recreation of the course website's CFG samples (seeds 180–184, w = 7)</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> Compare these samples with the unguided ones
-                    from Section 1.6 (same seeds, same starting noise). Discuss the improvement in image quality and
-                    prompt alignment (clean, coherent faces, studio-style lighting) and the loss of diversity (the
-                    samples look much more alike in pose, framing, and style).</p>
+                <p class="analysis-textbox">These images are clearly much more realistic!</p>
             </div>
         </section>
 
@@ -286,19 +288,19 @@
 
             <h3 class="subsection-heading" id="a-3-1">3.1 Image-to-Image Editing</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain the SDEdit-style editing procedure: noise
-                    an existing image to a starting time with the forward process, then run the CFG Euler sampler
-                    (w = 7, h = 0.02, prompt "a high quality photo") from there to t = 1. Explain why this works (the
-                    model must "hallucinate" to denoise, pulling the image back onto the natural image manifold) and
-                    that a smaller starting time means more noise and a bigger edit. List the starting times used:
-                    0.02, 0.04, 0.06, 0.10, 0.14, 0.25, 0.50.</p>
+                <p class="analysis-textbox">We can use this to "edit" images! By adding some noise to our images and using
+                    our new denoising strategy with a much higher emphasis on the text prompt, we can get our model to output
+                    images that resemble the input broadly but are mostly generated by the model. This is different from part 1
+                    because the model is not trying to recreate the original image, it is just trying to create an image that follows
+                    the text prompt. If it happens to be given an image with a clear structure, it will follow it, but the goal is
+                    just any image fitting the prompt. This is what that process looks like using prompt "a high quality photo", w = 7,
+                    and a variety of starting images and noise levels. The noisier an input is, the less its output will resemble
+                    the original.
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/edit_campanile.jpg" alt="Campanile edits at increasing starting times">
                     <figcaption>Campanile: original followed by edits at starting times 0.02, 0.04, 0.06, 0.10, 0.14, 0.25, and 0.50</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> Describe the Campanile progression: which
-                    features survive at each starting time (the pale vertical shape early on, the tower and trees by
-                    0.06, the clock face and belfry arches only around 0.25&ndash;0.50).</p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/edit_my_image_1.jpg" alt="Edits of my own image (grilled cheese) at increasing starting times">
                     <figcaption>My image (grilled cheese): original followed by edits at starting times 0.02 through 0.50</figcaption>
@@ -307,66 +309,63 @@
                     <img src="./results/edit_my_image_2.jpg" alt="Edits of my own image (dancers) at increasing starting times">
                     <figcaption>My image (dancers): original followed by edits at starting times 0.02 through 0.50</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> Describe what happens with your own two images.
-                    For example, at the lowest starting times the model ignores the input and generates unrelated
-                    people or objects, around 0.10&ndash;0.14 it keeps the layout and colors but reinterprets the
-                    content (the plate becomes a flatbread, the dancer becomes a mannequin), and by 0.25 the original
-                    returns almost unchanged.</p>
             </div>
 
             <h3 class="subsection-heading" id="a-3-drawings">Editing Hand-Drawn and Web Images</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain that this procedure is especially
-                    interesting for non-realistic inputs (drawings, paintings, unusual web images), since projecting
-                    them onto the natural image manifold turns them into photos. Say where the web image came from and
-                    how you made your drawings.</p>
+                <p class="analysis-textbox">The results become esspecially interesting when using inputs that aren't
+                    photorealistic. Here are the results of the same process on a cartoon image from the web and two
+                    of my own doodles, using the same prompt and w-value.
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/edit_web_image.jpg" alt="Edits of a web image of a cartoon duck at increasing starting times">
-                    <figcaption>Web image (cartoon duck): original followed by edits at starting times 0.02 through 0.50</figcaption>
+                    <figcaption>Duck</figcaption>
                 </figure>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/edit_drawing_1.jpg" alt="Edits of a hand-drawn night scene at increasing starting times">
-                    <figcaption>Hand drawing 1 (night scene): original followed by edits at starting times 0.02 through 0.50</figcaption>
+                    <figcaption>Night</figcaption>
                 </figure>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/edit_drawing_2.jpg" alt="Edits of a hand-drawn city skyline at increasing starting times">
-                    <figcaption>Hand drawing 2 (city skyline): original followed by edits at starting times 0.02 through 0.50</figcaption>
+                    <figcaption>Cityscape</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> Describe the results for the web image (the
-                    cartoon duck) and both drawings (the night scene and the city skyline). Highlight the most
-                    interesting edits and the starting time at which each input becomes recognizable again.</p>
+                <p class="analysis-textbox">The results aren't always realistic versions of the doodle, but they usually begin
+                    as some sort of realistic image at high starting noise levels and become recreations of the original image at
+                    lower noise levels.
+                </p>
             </div>
 
             <h3 class="subsection-heading" id="a-3-2">3.2 Text-Guided Image Editing</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain that this is the same editing procedure
-                    as 3.1, but with a custom prompt describing the desired edit instead of "a high quality photo".
-                    Describe the trade-off: smaller starting times let the prompt dominate, larger starting times
-                    preserve the original. State the prompt used for each image.</p>
+                <p class="analysis-textbox">To have more control over our putput images, we can use a different prompt. Using
+                    the exact same process, as before (only now with different prompts) I got the following outputs.
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/text_edit_campanile.jpg" alt="Text-guided Campanile edits toward a giant pencil">
-                    <figcaption>Campanile, prompt: "a photo of a giant pencil rising out of the ground" &mdash; original followed by edits at starting times 0.02 through 0.50</figcaption>
+                    <figcaption>Prompt: "a photo of a giant pencil rising out of the ground"</figcaption>
                 </figure>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/text_edit_my_image_1.jpg" alt="Text-guided edits of the grilled cheese toward glowing gemstones">
-                    <figcaption>My image (grilled cheese), prompt: "4 pieces of a glowing gemstone connected by magic energy" &mdash; original followed by edits at starting times 0.02 through 0.50</figcaption>
+                    <figcaption>Prompt: "4 pieces of a glowing gemstone connected by magic energy"</figcaption>
                 </figure>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/text_edit_my_image_2.jpg" alt="Text-guided edits of the dancers toward a children's cartoon">
-                    <figcaption>My image (dancers), prompt: "an image of two disco dancers in a children's cartoon" &mdash; original followed by edits at starting times 0.02 through 0.50</figcaption>
+                    <figcaption>Prompt: "an image of two disco dancers in a children's cartoon"</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> For each of the three edits, describe where the
-                    prompt wins, where the original wins, and the most interesting in-between starting times where the
-                    result keeps the original's composition while taking on the prompt's content.</p>
             </div>
 
             <h3 class="subsection-heading" id="a-3-3">3.3 Visual Anagrams</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain how <code>visual_anagrams</code> works:
-                    at each step compute v<sub>1</sub> = CFG velocity of x<sub>t</sub> with prompt p<sub>1</sub>,
-                    and v<sub>2</sub> = flip(CFG velocity of flip(x<sub>t</sub>) with prompt p<sub>2</sub>), where flip
-                    rotates by 180&deg;. Average them, v = (v<sub>1</sub> + v<sub>2</sub>) / 2, and take an Euler step
-                    with v. Mention how many runs it took to get good results.</p>
+                <p class="analysis-textbox">An even more creative application of this process is creating visual anagrams!
+                    Again generating images from pure noise (no input image) we can generate velocities for multiple textual
+                    prompts. To create images that depict different things at different rotations, we can generate one velocity
+                    with one prompt then another from the upside down version of the image with a different prompt. We can then
+                    flip that velocity upside down again so it aligns with a right side up version of the image. If we apply
+                    an update based off the averge of these velocities, an image that fits the first prompt when right side up but
+                    the second when upsdie down will emerge! While at first each seperate velocity may be pointing the final result
+                    towards completley noncomplementary images, as an image begins to gradually emerge the velocities will be basing
+                    the final off the current, shared image. Here are my favorite two results:
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/anagram_views_0.jpg" alt="Visual anagram shown upright as an island and rotated as an old man">
                     <figcaption>Anagram 1, upright: "a watercolor image of an island in the ocean". Rotated 180&deg;: "a watercolor image of a kind old man"</figcaption>
@@ -375,19 +374,17 @@
                     <img src="./results/anagram_views_1.jpg" alt="Visual anagram shown upright as two friends embracing and rotated as two enemies fighting">
                     <figcaption>Anagram 2, upright: "a pastel of two friends embracing". Rotated 180&deg;: "a pastel of two enemies fighting"</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> Comment on how convincing each illusion is in
-                    both orientations, which prompt pairs worked well or poorly, and why (e.g., prompts sharing a
-                    style like "an oil painting of ..." tend to blend better).</p>
             </div>
 
             <h3 class="subsection-heading" id="a-3-4">3.4 Hybrid Images</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain how <code>make_hybrids</code> adapts
-                    Factorized Diffusion: compute CFG velocities v<sub>1</sub> and v<sub>2</sub> for two prompts at
-                    the same x<sub>t</sub>, then combine v = lowpass(v<sub>1</sub>) + highpass(v<sub>2</sub>), where
-                    the low-pass is a Gaussian blur (kernel size 265, sigma 16) and the high-pass is the prediction
-                    minus its low-pass. Connect this to the hybrid images from Project 2: the low-pass prompt is what
-                    you see from far away and the high-pass prompt is what you see up close.</p>
+                <p class="analysis-textbox">Another way to combine velocities is via hybrid images. Here, two
+                    velocities are generated from the same orientation of the image (with different prompts). To
+                    combine them, we sum the high frequencies (fine details) of one with the low frequencies (general
+                    shapes and colors) of the other. This produces a final image that matches the high-frequency prompt
+                    from up-close when the details are easy to see and matches the low-frequency from afar when only those
+                    details are visible.
+                </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="size-slider">
                         <div class="size-slider__stage" style="aspect-ratio: 1 / 1;">
@@ -406,10 +403,6 @@
                             Drag to shrink: <span class="size-slider__value">100%</span></figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox"><strong>To write:</strong> Describe how well each hybrid works at full
-                    size versus small size, which prompt pairs were most successful, and how this generated approach
-                    compares to the filter-based hybrids from Project 2 (no alignment needed, and both interpretations
-                    are generated to be consistent with each other).</p>
             </div>
         </section>
 
