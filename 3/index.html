@@ -77,10 +77,10 @@
         <div class="gallery-rows" id="part-a">
             <p class="analysis-textbox">In part A, I explore what kind of things are possible using a trained
             image denoising model. I don't do any of my own model training until part B. Many of the techniques
-            in this part rely on often critiqued (and rightly so) aspect of AI - its ability to hallucinate. If
+            in this part rely on an often-critiqued (and rightly so) aspect of AI — its ability to hallucinate. If
             we pass a model that has been trained to denoise an image an input that is pure noise, it will "hallucinate"
             that it has been passed a natural image with noise added, and actually recover this "hallucinated" image!
-            This part of the part of the project explores how we can harness this to create meaningful images.</p>
+            This part of the project explores how we can harness this to create meaningful images.</p>
         </div>
 
         <section class="gallery-section">
@@ -107,11 +107,11 @@
             <div class="gallery-rows">
                 <p class="analysis-textbox">One way to try to correct the noise is by making the value of each output pixel
                     an average of its neighbors. Since the noise has a mean value of 0, we expect it to cancel out when summed
-                    across multiple values, leaving just the original pixel values. This can be done using a Guassin blur on the
+                    across multiple values, leaving just the original pixel values. This can be done using a Gaussian blur on the
                     noisy image (although for best results the noisy image should be divided by t first to reproduce an output
                     image of the same amplitude as the input). However, the Gaussian blur also removes fine details from our image.
                     The noisier the input, the more pixels have to be averaged to get a reliable output and the blurrier the output
-                    becomes. Results using this denoising method are shown below. Note how for noiser images a larger Gaussian blur
+                    becomes. Results using this denoising method are shown below. Note how for noisier images a larger Gaussian blur
                     kernel was needed, resulting in a blurrier output.
                 </p>
                 <figure class="featured-image featured-image--medium">
@@ -136,7 +136,7 @@
                     velocity. Our velocity predictor takes 3 inputs: the noisy image, the value of t, and a text prompt describing
                     the image we want it to produce a velocity towards. Below are the results of this denoising process at various
                     noise levels, all using the text prompt "a high quality photo". Much better than the Gaussian blur, but even
-                    this tequnique produces images that don't look very real on high-noise inputs.
+                    this technique produces images that don't look very real on high-noise inputs.
                 </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/one_step_0.25.jpg" alt="Original, noisy input, and one-step estimate at t = 0.25">
@@ -158,7 +158,7 @@
                     the noise from the original image. The corresponding image update is this velocity scaled by (1 - t), which is
                     the same as the original image minus the noisy image. This makes sense because it is the value we want
                     to add to our noisy image to recover the original. This objectively correct update is compared to
-                    our predicted updated at a variety of noise levels below. Also included is a heat map showing where the
+                    our predicted update at a variety of noise levels below. Also included is a heatmap showing where the
                     predicted and correct updates differ.</p>
                 <figure class="featured-image" style="max-width: 360px;">
                     <img src="./results/velocity_original.jpg" alt="Original image used for the velocity visualization">
@@ -178,7 +178,7 @@
                 </figure>
                 <p class="analysis-textbox">At higher noise levels, the model struggles to accurately predict things like
                     the texture of the bread or of the cheese. The true updates also contain exact imprints of the noise pattern,
-                    which our model doesn't know, so can't recreate.
+                    which our model doesn't know, so it can't recreate them.
                 </p>
             </div>
 
@@ -188,16 +188,16 @@
                     Since our denoising model is less accurate at higher noise levels, we don't have to denoise all at once.
                     Instead, we can predict the velocity at the given noise level and only move the image a little in that direction.
                     Then, we can predict the velocity again and move a little in the direction of the new velocity. The result of this
-                    process is shown below where the image was denoised over 25 steps. The partially denoised image is shown from every
-                    5th step with the corresponding t.
+                    process is shown below, where the image was denoised over 25 steps. The partially denoised image is shown at every
+                    5th step, with the corresponding t.
                 </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/trajectory.jpg" alt="Euler denoising trajectory from t = 0.5 to t = 1.0">
                     <figcaption>Euler denoising trajectory: initial state at t = 0.50, every fifth update, and the final image at t = 1.00</figcaption>
                 </figure>
-                <p class="analysis-textbox">Below is a comparison of all the denoising method on the same noisy input (with t-value
+                <p class="analysis-textbox">Below is a comparison of all the denoising methods on the same noisy input (with a t-value of
                     0.5). The blurred image fails to eliminate all the noise while reducing image detail. The one-step denoiser is
-                    much better but still struggles to recrate the fine textures from the original image with only one chance to
+                    much better but still struggles to recreate the fine textures from the original image with only one chance to
                     predict the velocity from a very noisy image. The Euler method is the best (although also the most computationally
                     expensive), as it can refine its velocity predictions as the noise decreases.
                 </p>
@@ -210,9 +210,9 @@
             <h3 class="subsection-heading" id="a-1-6">1.6 Generating Images from Noise</h3>
             <div class="gallery-rows">
                 <p class="analysis-textbox">This technique can be expanded to generate images. If instead of passing our Euler
-                    denoising method a noisy recreation of an image we pass it pure noise, it will still be capable of "denoising"
+                    denoising method a noisy recreation of an image, we pass it pure noise, it will still be capable of "denoising"
                     our image. Now, instead of trying to recreate an altered input image, it is guided only by the textual prompt
-                    the denoiser is given. Although noticably imperfect, this simple technique is surprisingly capable of image
+                    the denoiser is given. Although noticeably imperfect, this simple technique is surprisingly capable of image
                     generation from scratch! Here are a few examples.
                 </p>
                 <div class="image-gallery image-gallery--fifths">
@@ -250,7 +250,7 @@
                     of our velocity that relate to our text prompt by subtracting a velocity generated without a text prompt
                     from our calculated velocity. We can then add these isolated aspects back into our final velocity to strengthen
                     them. The final equation is v<sub>CFG</sub> = v<sub>text</sub> + w * (v<sub>text</sub> - v<sub>no text</sub>)
-                    where w is how strongly we add to increase these elements. Here are results using w = 7 and prompt "a high quality
+                    where w is how strongly we increase these elements. Here are results using w = 7 and the prompt "a high quality
                     photo".
                 </p>
                 <div class="image-gallery image-gallery--fifths">
@@ -287,9 +287,9 @@
                 <p class="analysis-textbox">We can use this to "edit" images! By adding some noise to our images and using
                     our new denoising strategy with a much higher emphasis on the text prompt, we can get our model to output
                     images that resemble the input broadly but are mostly generated by the model. This is different from part 1
-                    because the model is not trying to recreate the original image, it is just trying to create an image that follows
+                    because the model is not trying to recreate the original image. It is just trying to create an image that follows
                     the text prompt. If it happens to be given an image with a clear structure, it will follow it, but the goal is
-                    just any image fitting the prompt. This is what that process looks like using prompt "a high quality photo", w = 7,
+                    just any image fitting the prompt. This is what that process looks like using the prompt "a high quality photo", w = 7,
                     and a variety of starting images and noise levels. The noisier an input is, the less its output will resemble
                     the original.
                 </p>
@@ -309,7 +309,7 @@
 
             <h3 class="subsection-heading" id="a-3-drawings">Editing Hand-Drawn and Web Images</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox">The results become esspecially interesting when using inputs that aren't
+                <p class="analysis-textbox">The results become especially interesting when using inputs that aren't
                     photorealistic. Here are the results of the same process on a cartoon image from the web and two
                     of my own doodles, using the same prompt and w-value.
                 </p>
@@ -333,8 +333,8 @@
 
             <h3 class="subsection-heading" id="a-3-2">3.2 Text-Guided Image Editing</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox">To have more control over our putput images, we can use a different prompt. Using
-                    the exact same process, as before (only now with different prompts) I got the following outputs.
+                <p class="analysis-textbox">To have more control over our output images, we can use a different prompt. Using
+                    the exact same process as before (only now with different prompts), I got the following outputs.
                 </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/text_edit_campanile.jpg" alt="Text-guided Campanile edits toward a giant pencil">
@@ -353,14 +353,14 @@
             <h3 class="subsection-heading" id="a-3-3">3.3 Visual Anagrams</h3>
             <div class="gallery-rows">
                 <p class="analysis-textbox">An even more creative application of this process is creating visual anagrams!
-                    Again generating images from pure noise (no input image) we can generate velocities for multiple textual
+                    Again, generating images from pure noise (no input image), we can generate velocities for multiple textual
                     prompts. To create images that depict different things at different rotations, we can generate one velocity
-                    with one prompt then another from the upside down version of the image with a different prompt. We can then
-                    flip that velocity upside down again so it aligns with a right side up version of the image. If we apply
-                    an update based off the averge of these velocities, an image that fits the first prompt when right side up but
-                    the second when upsdie down will emerge! While at first each seperate velocity may be pointing the final result
-                    towards completley noncomplementary images, as an image begins to gradually emerge the velocities will be basing
-                    the final off the current, shared image. Here are my favorite two results:
+                    with one prompt, then another from the upside-down version of the image with a different prompt. We can then
+                    flip that velocity upside down again so it aligns with a right-side-up version of the image. If we apply
+                    an update based on the average of these velocities, an image that fits the first prompt when right side up, but
+                    the second when upside down, will emerge! While at first each separate velocity may be pointing the final result
+                    toward completely non-complementary images, as an image begins to gradually emerge, the velocities will be basing
+                    the final result on the current, shared image. Here are my favorite two results:
                 </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/anagram_views_0.jpg" alt="Visual anagram shown upright as an island and rotated as an old man">
@@ -378,8 +378,8 @@
                     velocities are generated from the same orientation of the image (with different prompts). To
                     combine them, we sum the high frequencies (fine details) of one with the low frequencies (general
                     shapes and colors) of the other. This produces a final image that matches the high-frequency prompt
-                    from up-close when the details are easy to see and matches the low-frequency from afar when only those
-                    details are visible.
+                    up close, when the details are easy to see, and matches the low-frequency prompt from afar, when only those
+                    general shapes and colors are visible.
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="size-slider">
@@ -414,7 +414,7 @@
 
             <h3 class="subsection-heading" id="b-1-1">1.1–1.2.1 Implementing and Training a Denoiser</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox">To train such a model, noisy inputs are needed. Similarly to in part A, these
+                <p class="analysis-textbox">To train such a model, noisy inputs are needed. As in part A, these
                     can be generated by adding Gaussian noise to our input image (although in part A we took a weighted average).
                     Noisy image z is created by: z = x + &sigma;&epsilon; where x is the original image, &sigma; is the noise level,
                     and &epsilon; is the noise. For now, we train the model on only &sigma; = 0.5.
@@ -445,14 +445,14 @@
                     <figcaption>Epoch 5 at &sigma; = 0.5. Rows: clean digit, noisy input, prediction</figcaption>
                 </figure>
                 <p class="analysis-textbox">Notice how after more training the model has learned the necessary weights 
-                    to make the denoising much more precise..</p>
+                    to make the denoising much more precise.</p>
             </div>
 
             <h3 class="subsection-heading" id="b-1-2-2">1.2.2 Out-of-Distribution Testing</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox">Since our model trained only on noisy images with &sigma; = 0.5, it is ill prepared
+                <p class="analysis-textbox">Since our model trained only on noisy images with &sigma; = 0.5, it is ill-prepared
                     to denoise images with different noise levels. Let's take a look at what the results look like for attempts
-                    at denoising various noise levels.
+                    at denoising images at various noise levels.
                 </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./3b_output/denoised_images_by_sigma.jpg" alt="The same test 7 denoised at seven noise levels">
@@ -463,10 +463,10 @@
             <h3 class="subsection-heading" id="b-1-2-3">1.2.3 Denoising Pure Noise</h3>
             <div class="gallery-rows">
                 <p class="analysis-textbox">Let's try one of our strategies from part A: inputting pure noise. Since this
-                    is only a one-step denoiser, it can't adjust its velocity predictions as the image becomes less noisy. As
+                    is only a one-step denoiser, it can't adjust its predictions as the image becomes less noisy. As
                     a result, with only pure noise as a starting image the denoiser attempts to force the image back to the image that
                     will reduce the mean squared error against all the training images. This ends up being the "average image" 
-                    of our training set. This isn't a problem with model sophistication, we're using a model that
+                    of our training set. This isn't a problem with model sophistication. We're using a model that
                     isn't being trained to output new images, no matter how well it trains! This is why the results don't look
                     any better after more training.
                 </p>
@@ -494,9 +494,8 @@
                     denoising gradually using small steps. For this to work, we first need a denoiser capable
                     of working on images of any noise level (not just 0.5). We can create such a model by adding
                     input channels for the t variable to our processed image as we scale it up. If we make sure
-                    to randomize what noise level we use during trainings and include this in our model, the
-                    training process ends up being much the same. This adds a lot of complexity to our model,
-                    so we train it for much longer. </p>
+                    to randomize what noise level we use during training and include this in our model, the
+                    training process ends up being much the same. </p>
                 <figure class="featured-image featured-image--medium">
                     <img src="./3b_output/2.2 Training_loss.jpg" alt="Training loss curve for the time-conditioned UNet">
                     <figcaption>Training loss for the time-conditioned UNet</figcaption>
@@ -530,7 +529,7 @@
             <h3 class="subsection-heading" id="b-2-4">2.4–2.5 Class-Conditioned UNet</h3>
             <div class="gallery-rows">
                 <p class="analysis-textbox">To solve this problem, we can condition our model not only on t but also
-                    on the digit we want to generate! This is done in a very similar process to conditioning by t in which
+                    on the digit we want to generate! This is done through a process very similar to conditioning on t, in which
                     we allow the digit to influence the output at each level as we bring our image size back up. When training this
                     model, we not only provide the noise level t but also the digit of the original image. In order to allow for
                     meaningful images even when no digit is provided, in 10% of training examples we do not provide a digit.
@@ -567,10 +566,10 @@
                 </div>
                 <p class="analysis-textbox">Throughout the training, we have decreased the learning rate of our model
                     exponentially after each epoch of training in order to allow it to converge more easily. However, this is
-                    not necessary. I have recreated same model using a constant learning rate for the entire training process.
-                    In the original training, the learning rate was multiplied by (0.1<super>(1.0 / 10)</super>) after each of 10
+                    not necessary. I have recreated the same model using a constant learning rate for the entire training process.
+                    In the original training, the learning rate was multiplied by (0.1<sup>(1.0 / 10)</sup>) after each of 10
                     epochs. To try to produce similar results with a constant learning rate, I used the value the dynamic learning
-                    rate had halfway through the epochs. This was the initial learning rate, 0.01, times (0.1<super>(1.0 / 10)</super>)
+                    rate had halfway through the epochs. This was the initial learning rate, 0.01, times (0.1<sup>(1.0 / 10)</sup>)
                     to the fifth power.
                 </p>
                 <figure class="featured-image featured-image--medium">
