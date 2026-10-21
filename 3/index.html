@@ -55,9 +55,7 @@
                         <li>
                             <a href="#b-part-1">Part 1: Training a Single-Step Denoising UNet</a>
                             <ol>
-                                <li><a href="#b-1-1">1.1 Implementing the UNet</a></li>
-                                <li><a href="#b-1-2">1.2 Using the UNet to Train a Denoiser</a></li>
-                                <li><a href="#b-1-2-1">1.2.1 Training</a></li>
+                                <li><a href="#b-1-1">1.1–1.2.1 Implementing and Training a Denoiser</a></li>
                                 <li><a href="#b-1-2-2">1.2.2 Out-of-Distribution Testing</a></li>
                                 <li><a href="#b-1-2-3">1.2.3 Denoising Pure Noise</a></li>
                             </ol>
@@ -65,11 +63,9 @@
                         <li>
                             <a href="#b-part-2">Part 2: Training a Flow Matching Model</a>
                             <ol>
-                                <li><a href="#b-2-1">2.1 Adding Time Conditioning to the UNet</a></li>
-                                <li><a href="#b-2-2">2.2 Training the Time-Conditioned UNet</a></li>
+                                <li><a href="#b-2-1">2.1–2.2 Time-Conditioned UNet</a></li>
                                 <li><a href="#b-2-3">2.3 Sampling from the Time-Conditioned UNet</a></li>
-                                <li><a href="#b-2-4">2.4 Adding Class Conditioning to the UNet</a></li>
-                                <li><a href="#b-2-5">2.5 Training the Class-Conditioned UNet</a></li>
+                                <li><a href="#b-2-4">2.4–2.5 Class-Conditioned UNet</a></li>
                                 <li><a href="#b-2-6">2.6 Sampling from the Class-Conditioned UNet</a></li>
                             </ol>
                         </li>
@@ -368,11 +364,11 @@
                 </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/anagram_views_0.jpg" alt="Visual anagram shown upright as an island and rotated as an old man">
-                    <figcaption>Anagram 1, upright: "a watercolor image of an island in the ocean". Rotated 180&deg;: "a watercolor image of a kind old man"</figcaption>
+                    <figcaption>Upright: "a watercolor image of an island in the ocean". Rotated 180&deg;: "a watercolor image of a kind old man"</figcaption>
                 </figure>
                 <figure class="featured-image featured-image--wide">
                     <img src="./results/anagram_views_1.jpg" alt="Visual anagram shown upright as two friends embracing and rotated as two enemies fighting">
-                    <figcaption>Anagram 2, upright: "a pastel of two friends embracing". Rotated 180&deg;: "a pastel of two enemies fighting"</figcaption>
+                    <figcaption>Upright: "a pastel of two friends embracing". Rotated 180&deg;: "a pastel of two enemies fighting"</figcaption>
                 </figure>
             </div>
 
@@ -391,7 +387,7 @@
                             <img class="size-slider__image" src="./results/hybrid_0.jpg" alt="Hybrid image of the Batman logo seen from far away and a nighttime cityscape up close">
                         </div>
                         <input class="size-slider__range" type="range" min="5" max="100" value="100" aria-label="Hybrid 1 size">
-                        <figcaption>Hybrid 1 &mdash; far: "the batman logo", near: "a nighttime cityscape".
+                        <figcaption>Far: "the batman logo", Near: "a nighttime cityscape".
                             Drag to shrink: <span class="size-slider__value">100%</span></figcaption>
                     </figure>
                     <figure class="size-slider">
@@ -399,7 +395,7 @@
                             <img class="size-slider__image" src="./results/hybrid_1.jpg" alt="Hybrid image of a pirate ship seen from far away and an ocean with islands up close">
                         </div>
                         <input class="size-slider__range" type="range" min="5" max="100" value="100" aria-label="Hybrid 2 size">
-                        <figcaption>Hybrid 2 &mdash; far: "a lithograph of a pirate ship", near: "a lithograph of an ocean with islands".
+                        <figcaption>Far: "a lithograph of a pirate ship", Near: "a lithograph of an ocean with islands".
                             Drag to shrink: <span class="size-slider__value">100%</span></figcaption>
                     </figure>
                 </div>
@@ -409,31 +405,20 @@
         <section class="gallery-section">
             <h2 class="part-heading" id="part-b">Part B: Flow Matching from Scratch</h2>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> A short introduction to Part B. Explain that,
-                    unlike Part A, you train your own model from scratch on MNIST. The warmup is a one-step denoising
-                    UNet. The main task is a flow matching model that predicts the velocity from noise to a clean
-                    digit, first conditioned on time and then also on the digit class.</p>
+                <p class="analysis-textbox">Part A was done using a pre-trained model to help with the denoising.
+                    In part B, I train a model myself using a 28x28 pixel handwritten digit image dataset.
+                </p>
             </div>
 
             <h2 class="part-heading" id="b-part-1">Part 1: Training a Single-Step Denoising UNet</h2>
 
-            <h3 class="subsection-heading" id="b-1-1">1.1 Implementing the UNet</h3>
+            <h3 class="subsection-heading" id="b-1-1">1.1–1.2.1 Implementing and Training a Denoiser</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Describe the UNet you implemented. It downsamples
-                    with skip connections and then upsamples back to the image size. Name the blocks: Conv (changes
-                    channels, not resolution), DownConv (halves spatial size), UpConv (doubles spatial size), Flatten
-                    (7&times;7 average pool to 1&times;1), Unflatten (1&times;1 back to 7&times;7), and Concat
-                    (channel-wise skip connection). Note that composed blocks add depth without changing the tensor
-                    shape, and that D is the hidden-channel hyperparameter.</p>
-            </div>
-
-            <h3 class="subsection-heading" id="b-1-2">1.2 Using the UNet to Train a Denoiser</h3>
-            <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> State the training objective: given a noisy
-                    image z, the denoiser D<sub>&theta;</sub> is trained with an L2 loss to recover the clean digit x.
-                    Explain the noising process z = x + &sigma;&epsilon; with &epsilon; drawn from a standard normal,
-                    on MNIST digits normalized to [0, 1]. Point out that the images get noisier as &sigma; increases
-                    across 0.0, 0.2, 0.4, 0.5, 0.6, 0.8, and 1.0.</p>
+                <p class="analysis-textbox">To train such a model, noisy inputs are needed. Similarly to in part A, these
+                    can be generated by adding Gaussian noise to our input image (although in part A we took a weighted average).
+                    Noisy image z is created by: z = x + &sigma;&epsilon; where x is the original image, &sigma; is the noise level,
+                    and &epsilon; is the noise. For now, we train the model on only &sigma; = 0.5.
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./3b_output/noisy_images_by_sigma.jpg" alt="A test digit 7 at seven increasing noise levels">
                     <figcaption>Noising process on a test 7 at &sigma; = 0.0, 0.2, 0.4, 0.5, 0.6, 0.8, and 1.0</figcaption>
@@ -442,15 +427,11 @@
                     <img src="./3b_output/noisy_images.jpg" alt="A digit 5 at seven increasing noise levels">
                     <figcaption>The same sweep on a 5</figcaption>
                 </figure>
-            </div>
-
-            <h3 class="subsection-heading" id="b-1-2-1">1.2.1 Training</h3>
-            <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Describe the training setup. The model denoises
-                    images noised at &sigma; = 0.5. Train only on the MNIST training set, shuffled, with a recommended
-                    batch size of 256, for 5 epochs. Noise each batch when it is loaded so every epoch sees a new
-                    &epsilon;. Use the UNet from 1.1 with D = 128 and Adam at learning rate 1e-4. Say how long training
-                    took.</p>
+                <p class="analysis-textbox">We train a U-Net model on these noisy images using Mean-Squared Error loss. U-Net
+                    models process the whole image, then smaller and smaller representations of it to isolate the most important
+                    features. They then scale these versions back up and combine them with the processed versions at each size in
+                    order to maintain the details present at each scale. The training loss over time is plotted below and samples
+                    of the model's denoising are shown at various points during the model's training.</p>
                 <figure class="featured-image featured-image--medium">
                     <img src="./3b_output/1.2.1 Training_loss.jpg" alt="Training loss curve for denoising at sigma 0.5">
                     <figcaption>Training loss for &sigma; = 0.5, logged over optimizer steps</figcaption>
@@ -463,17 +444,16 @@
                     <img src="./3b_output/denoise_epoch_5.jpg" alt="Clean digits, noisy inputs, and predictions after epoch 5">
                     <figcaption>Epoch 5 at &sigma; = 0.5. Rows: clean digit, noisy input, prediction</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> Compare the epoch 1 and epoch 5 outputs. Note
-                    how much of the digit is recovered by the end of training, and what the loss curve does over the
-                    5 epochs.</p>
+                <p class="analysis-textbox">Notice how after more training the model has learned the necessary weights 
+                    to make the denoising much more precise..</p>
             </div>
 
             <h3 class="subsection-heading" id="b-1-2-2">1.2.2 Out-of-Distribution Testing</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain that the denoiser only saw &sigma; = 0.5
-                    during training. Here the same test digit is noised at &sigma; = 0.0, 0.2, 0.4, 0.5, 0.6, 0.8, and
-                    1.0. Describe where denoising still works and where it breaks down as the noise moves away from
-                    the training level.</p>
+                <p class="analysis-textbox">Since our model trained only on noisy images with &sigma; = 0.5, it is ill prepared
+                    to denoise images with different noise levels. Let's take a look at what the results look like for attempts
+                    at denoising various noise levels.
+                </p>
                 <figure class="featured-image featured-image--wide">
                     <img src="./3b_output/denoised_images_by_sigma.jpg" alt="The same test 7 denoised at seven noise levels">
                     <figcaption>Same test digit denoised at &sigma; = 0.0, 0.2, 0.4, 0.5, 0.6, 0.8, and 1.0</figcaption>
@@ -482,10 +462,14 @@
 
             <h3 class="subsection-heading" id="b-1-2-3">1.2.3 Denoising Pure Noise</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain the change in the task: the input is now
-                    pure Gaussian noise &epsilon;, with no noisy digit underneath, and the target is still a clean
-                    training image. Training otherwise matches 1.2.1 and runs for 5 epochs. This is an attempt to make
-                    one-step denoising generative.</p>
+                <p class="analysis-textbox">Let's try one of our strategies from part A: inputting pure noise. Since this
+                    is only a one-step denoiser, it can't adjust its velocity predictions as the image becomes less noisy. As
+                    a result, with only pure noise as a starting image the denoiser attempts to force the image back to the image that
+                    will reduce the mean squared error against all the training images. This ends up being the "average image" 
+                    of our training set. This isn't a problem with model sophistication, we're using a model that
+                    isn't being trained to output new images, no matter how well it trains! This is why the results don't look
+                    any better after more training.
+                </p>
                 <figure class="featured-image featured-image--medium">
                     <img src="./3b_output/1.2.3 Training_loss.jpg" alt="Training loss curve for denoising pure noise">
                     <figcaption>Training loss for denoising pure noise, logged over optimizer steps</figcaption>
@@ -498,36 +482,21 @@
                     <img src="./3b_output/pure_noise_epoch_5.jpg" alt="Pure noise inputs and blurry outputs after epoch 5">
                     <figcaption>Epoch 5. Top: pure noise. Bottom: model output</figcaption>
                 </figure>
-                <p class="analysis-textbox"><strong>To write:</strong> Describe the patterns in the generated outputs
-                    and how they relate to the training digits 0&ndash;9. With an MSE loss the model predicts the point
-                    that minimizes the sum of squared distances to the training examples, like a centroid. Explain what
-                    that centroid is here (a blurry average digit rather than a sample of one class) and why one step
-                    from pure noise cannot produce varied, sharp digits.</p>
             </div>
         </section>
 
         <section class="gallery-section">
             <h2 class="part-heading" id="b-part-2">Part 2: Training a Flow Matching Model</h2>
 
-            <h3 class="subsection-heading" id="b-2-1">2.1 Adding Time Conditioning to the UNet</h3>
+            <h3 class="subsection-heading" id="b-2-1">2.1–2.2 Time-Conditioned UNet</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain why one-step denoising fails as a
-                    generator and why flow matching iterates instead. Give the interpolation
-                    x<sub>t</sub> = (1 - t)x<sub>0</sub> + t x<sub>1</sub> and the flow
-                    u(x<sub>t</sub>, t) = x<sub>1</sub> - x<sub>0</sub>. The UNet u<sub>&theta;</sub>(x<sub>t</sub>, t)
-                    is trained to match that flow. Describe how scalar t, normalized to [0, 1], is injected: two
-                    fully connected blocks, FCBlock, modulate the unflatten and the first upsampling block by
-                    multiplying those activations by the embedded time.</p>
-            </div>
-
-            <h3 class="subsection-heading" id="b-2-2">2.2 Training the Time-Conditioned UNet</h3>
-            <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Describe training. Each step takes a random
-                    training digit x<sub>1</sub>, a random t, and noise x<sub>0</sub>, builds x<sub>t</sub>, and
-                    regresses the flow. Noise the batch when it is loaded. Recommended settings: MNIST training set,
-                    shuffled, batch size 64, hidden dimension D = 64, Adam with initial learning rate 1e-2, and an
-                    exponential learning-rate decay with gamma 0.1<sup>(1 / num_epochs)</sup>, stepped once per epoch.
-                    Say how many epochs you trained.</p>
+                <p class="analysis-textbox">To fix this, we need to return to another strategy from part A: 
+                    denoising gradually using small steps. For this to work, we first need a denoiser capable
+                    of working on images of any noise level (not just 0.5). We can create such a model by adding
+                    input channels for the t variable to our processed image as we scale it up. If we make sure
+                    to randomize what noise level we use during trainings and include this in our model, the
+                    training process ends up being much the same. This adds a lot of complexity to our model,
+                    so we train it for much longer. </p>
                 <figure class="featured-image featured-image--medium">
                     <img src="./3b_output/2.2 Training_loss.jpg" alt="Training loss curve for the time-conditioned UNet">
                     <figcaption>Training loss for the time-conditioned UNet</figcaption>
@@ -536,9 +505,12 @@
 
             <h3 class="subsection-heading" id="b-2-3">2.3 Sampling from the Time-Conditioned UNet</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain iterative sampling: start from Gaussian
-                    noise and repeatedly step along the predicted flow until t = 1. Show samples after 1, 5, and 10
-                    epochs. Describe how legible the digits get. They do not need to be perfect.</p>
+                <p class="analysis-textbox">We can now use our model to generate images from pure noise. By denoising
+                    little by little, and adjusting our predictions based on the current level of noise, our model can
+                    take a partially denoised image and guide it towards the individual digits it resembles. However, it
+                    is still influenced by every image, even if the images of other digits aren't relevant once it is clear
+                    which digit is being generated. This is why the results are so messy.
+                </p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
                         <img src="./3b_output/flow_matching_samples_epoch1.jpg" alt="Time-conditioned MNIST samples after epoch 1">
@@ -555,20 +527,14 @@
                 </div>
             </div>
 
-            <h3 class="subsection-heading" id="b-2-4">2.4 Adding Class Conditioning to the UNet</h3>
+            <h3 class="subsection-heading" id="b-2-4">2.4–2.5 Class-Conditioned UNet</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain class conditioning. The class c is a
-                    one-hot vector over digits 0&ndash;9, not a scalar. Two more FCBlocks embed c, and the unflatten
-                    and first upsampling block become c<sub>1</sub> &middot; unflatten + t<sub>1</sub> and
-                    c<sub>2</sub> &middot; up1 + t<sub>2</sub>. For classifier-free guidance, drop the class vector
-                    (set it to 0) 10% of the time, p<sub>uncond</sub> = 0.1, so the model can also run unconditionally.</p>
-            </div>
-
-            <h3 class="subsection-heading" id="b-2-5">2.5 Training the Class-Conditioned UNet</h3>
-            <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Note that training matches the time-only setup,
-                    except each batch also carries the class vector and the class is dropped on 10% of steps. Class
-                    conditioning converges faster, so training stops at 10 epochs.</p>
+                <p class="analysis-textbox">To solve this problem, we can condition our model not only on t but also
+                    on the digit we want to generate! This is done in a very similar process to conditioning by t in which
+                    we allow the digit to influence the output at each level as we bring our image size back up. When training this
+                    model, we not only provide the noise level t but also the digit of the original image. In order to allow for
+                    meaningful images even when no digit is provided, in 10% of training examples we do not provide a digit.
+                </p>
                 <figure class="featured-image featured-image--medium">
                     <img src="./3b_output/2.5 Training (scheduler)_loss.jpg" alt="Training loss curve for the class-conditioned UNet with the learning-rate scheduler">
                     <figcaption>Training loss for the class-conditioned UNet, with the learning-rate scheduler</figcaption>
@@ -577,10 +543,14 @@
 
             <h3 class="subsection-heading" id="b-2-6">2.6 Sampling from the Class-Conditioned UNet</h3>
             <div class="gallery-rows">
-                <p class="analysis-textbox"><strong>To write:</strong> Explain sampling with classifier-free guidance
-                    at &gamma; = 5.0. For each of epochs 1, 5, and 10, show 4 generated instances of every digit
-                    0&ndash;9. Compare these with the time-only samples from 2.3: sharper digits, faster convergence,
-                    and control over which digit appears.</p>
+                <p class="analysis-textbox">In order to sample images, we revisit classifier-free guidance (CFG) from
+                    part A. The idea is the same, but this time we are using a digit instead of a text prompt. Another
+                    difference is that we add the isolated context velocity to an unconditional prediction as opposed to
+                    a conditional one like we did before. The velocity for each Euler step (tiny bit of denoising) is then
+                    u = u<sub>no digit</sub> + &gamma;(u<sub>digit</sub> - u<sub>no digit</sub>). This makes our model more
+                    accurate and allows us to control the outputted digit at the same time! Four results for each digit are shown
+                    at various points in the training process below.
+                </p>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
                         <img src="./3b_output/conditional_flow_matching_scheduler_samples_epoch1.jpg" alt="Class-conditioned samples after epoch 1 with the scheduler">
@@ -595,10 +565,14 @@
                         <figcaption>Epoch 10, &gamma; = 5.0, four of each digit</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox"><strong>To write:</strong> Describe the attempt to drop the exponential
-                    learning-rate scheduler while keeping the same sample quality. Say what you changed to compensate
-                    (for example a different learning rate or schedule) and whether the samples still match the run
-                    that used the scheduler.</p>
+                <p class="analysis-textbox">Throughout the training, we have decreased the learning rate of our model
+                    exponentially after each epoch of training in order to allow it to converge more easily. However, this is
+                    not necessary. I have recreated same model using a constant learning rate for the entire training process.
+                    In the original training, the learning rate was multiplied by (0.1<super>(1.0 / 10)</super>) after each of 10
+                    epochs. To try to produce similar results with a constant learning rate, I used the value the dynamic learning
+                    rate had halfway through the epochs. This was the initial learning rate, 0.01, times (0.1<super>(1.0 / 10)</super>)
+                    to the fifth power.
+                </p>
                 <figure class="featured-image featured-image--medium">
                     <img src="./3b_output/2.5 Training (no scheduler)_loss.jpg" alt="Training loss curve for the class-conditioned UNet without the learning-rate scheduler">
                     <figcaption>Training loss without the exponential learning-rate scheduler</figcaption>
