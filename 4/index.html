@@ -67,9 +67,9 @@
                 </div>
 
                 <h3 class="subsection-heading">Set 2: Outdoor campus</h3>
-                <p class="analysis-textbox">The Valley and Life Sciences building and adjacent lawn on campus. In the automatic 
+                <p class="analysis-textbox">The Valley Life Sciences Building and adjacent lawn on campus. In the automatic 
                     correspondence part of the project, these images may be tough to work with because of the lack of obvious
-                    corners. Using manual correspondences however, it was easy enough to use the corners of shadows, light posts
+                    corners. Using manual correspondences, however, it was easy enough to use the corners of shadows, light posts,
                     and tree tops.</p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
@@ -82,16 +82,17 @@
                     </figure>
                 </div>
 
-                <h3 class="subsection-heading">Set 3</h3>
-                <p class="analysis-textbox">Third mosaic source pair.</p>
+                <h3 class="subsection-heading">Set 3: House</h3>
+                <p class="analysis-textbox">The outside of my house, shot from the same center of projection with
+                    a vertical rotation.</p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
-                        <img src="./placeholder.svg" alt="Placeholder for third pair, left view">
-                        <figcaption>Set 3 — left view</figcaption>
+                        <img src="./images/house_up.jpg" alt="House source image, upper view">
+                        <figcaption>House — up</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./placeholder.svg" alt="Placeholder for third pair, right view">
-                        <figcaption>Set 3 — right view</figcaption>
+                        <img src="./images/house_down.jpg" alt="House source image, lower view">
+                        <figcaption>House — down</figcaption>
                     </figure>
                 </div>
             </div>
@@ -272,24 +273,24 @@ b =
             <h2 class="part-heading" id="a-3">A.3 Warp the Images</h2>
             <div class="gallery-rows">
                 <p class="analysis-textbox">To warp an image using H, we multiply every pixel by H to find its
-                corresponding pixel in the output. Since these output destinations sometimes do not fall cleanly
-                into new pixel destinations (e.g. some input pixels may get mapped between two pixels or two inputs
-                may get mapped to the same output destination), this can sometimes produce holes in the output where
-                no input pixel was mapped to. To counter this, we use inverse mapping. This means that for every
-                destination pixel, we apply H<sup>−1</sup> to find the corresponding source location, then interpolate.
-                We can estimate the size and shape of the output canvas by first forward mapping the four source
-                corners through H, then inverse mapping every pixel within these output corners.</p>
+                corresponding pixel in the output. These output destinations sometimes do not fall cleanly onto new
+                pixel locations. For example, some input pixels may map between two pixels, or two inputs may map to
+                the same output destination. That can leave holes in the output where no input pixel was mapped. To
+                counter this, we use inverse mapping. This means that for every destination pixel, we apply
+                H<sup>−1</sup> to find the corresponding source location, then interpolate. We can estimate the size
+                and shape of the output canvas by first forward mapping the four source corners through H, then
+                inverse mapping every pixel within these output corners.</p>
                 <p class="analysis-textbox">When output pixels don't map cleanly to input pixels, interpolation is needed. For this
-                    project, I implemented two interpolation techniques. The first is nearest-neighbor interpolation, where when an
-                    output pixel was mapped to between multiple input pixels, it recieves the value of the closest pixel. Bilinear
-                    interpolation, on the other hand, recieves a weighted average of each of the pixels its input landed between,
-                    weighted by how close it was to each.
+                    project, I implemented two interpolation techniques. The first is nearest-neighbor interpolation: when an
+                    output pixel maps between multiple input pixels, it receives the value of the closest neighbor.
+                    Bilinear interpolation, on the other hand, takes a weighted average of the surrounding input pixels,
+                    weighted by how close the mapped location is to each.
                 </p>
                 <p class="analysis-textbox">Here, I use inverse mapping with both nearest-neighbor and bilinear interpolation
-                    to rectify images. Image rectification is when homographies are used to transform input images onto a given
-                    plane. To show how powerful this is, I've rectified images with known square or rectangular objects and transformed
-                    them onto a plane where the camera is looking orthogonally to them. To do this, I computed H using the four
-                    corners of the rectangular object (selected by hand) as input points and four hard coded rectangular points as
+                    to rectify images. Image rectification uses homographies to transform input images onto a given
+                    plane. To show how powerful this is, I've rectified images with known square or rectangular objects onto
+                    a plane where the camera looks at them orthogonally. To do this, I computed H using the four
+                    corners of the rectangular object (selected by hand) as input points (x and y) and four hard-coded rectangular points as
                     the output points (x' and y'). The first two images have been cropped to just show the rectified portion while the last
                     is shown in its entirety to show how this process distorts the rest of the image.
                 </p>
@@ -301,11 +302,11 @@ b =
                     </figure>
                     <figure class="gallery-item">
                         <img src="./images/rectified_hallway_nn.jpg" alt="Hallway nearest-neighbor rectification">
-                        <figcaption>Nearest neighbor</figcaption>
+                        <figcaption>Nearest neighbor (rectified to square)</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./images/rectified_hallway_bilinear.jpg" alt="Hallway bilinear rectification">
-                        <figcaption>Bilinear</figcaption>
+                        <figcaption>Bilinear (rectified to square)</figcaption>
                     </figure>
                 </div>
 
@@ -317,11 +318,11 @@ b =
                     </figure>
                     <figure class="gallery-item">
                         <img src="./images/rectified_mona_lisa_nn.jpg" alt="Mona Lisa nearest-neighbor rectification">
-                        <figcaption>Nearest neighbor</figcaption>
+                        <figcaption>Nearest neighbor (rectified using 1.453:1 height-to-width ratio, the same dimensions as the Mona Lisa)</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./images/rectified_mona_lisa_bilinear.jpg" alt="Mona Lisa bilinear rectification">
-                        <figcaption>Bilinear</figcaption>
+                        <figcaption>Bilinear (rectified using 1.453:1 height-to-width ratio, the same dimensions as the Mona Lisa) </figcaption>
                     </figure>
                 </div>
 
@@ -333,19 +334,20 @@ b =
                     </figure>
                     <figure class="gallery-item">
                         <img src="./images/rectified_building_nn.jpg" alt="Building nearest-neighbor rectification">
-                        <figcaption>Nearest neighbor</figcaption>
+                        <figcaption>Nearest neighbor (rectified using 1:2 height-to-width ratio, estimated building dimensions)</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./images/rectified_building_bilinear.jpg" alt="Building bilinear rectification">
-                        <figcaption>Bilinear</figcaption>
+                        <figcaption>Bilinear (rectified using 1:2 height-to-width ratio, estimated building dimensions) </figcaption>
                     </figure>
                 </div>
 
                 <p class="analysis-textbox">Nearest neighbor is cheaper but introduces jagged artifacts under
-                strong warps. Bilinear averages the four surrounding source pixels, which softens those edges
-                and generally looks better for both rectification and mosaicing, at an extra cost. Since the only
-                extra cost to bilinear interpolation comes in the interpolation phase and does not affect the more expensive
-                actual computing of H, this is generally a modest extra cost.</p>
+                strong warps. The doubles of certain tiles in the first image are an example of that. Bilinear
+                averages the four surrounding source pixels, which softens those edges and generally looks better
+                for both rectification and mosaicing, at an extra cost. Since the only extra cost to bilinear
+                comes in the interpolation phase and does not affect the more expensive actual computing of H,
+                this is generally a modest extra cost.</p>
             </div>
         </section>
 
@@ -392,20 +394,34 @@ b =
                     <figcaption>Outdoors mosaic (bilinear warp + distance feathering)</figcaption>
                 </figure>
 
-                <h3 class="subsection-heading">Mosaic 3</h3>
+                <h3 class="subsection-heading">Mosaic 3: House</h3>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
-                        <img src="./placeholder.svg" alt="Placeholder for third mosaic source A">
-                        <figcaption>Source A</figcaption>
+                        <img src="./images/house_up.jpg" alt="House up source">
+                        <figcaption>Source — up</figcaption>
                     </figure>
                     <figure class="gallery-item">
-                        <img src="./placeholder.svg" alt="Placeholder for third mosaic source B">
-                        <figcaption>Source B</figcaption>
+                        <img src="./images/house_down.jpg" alt="House down source">
+                        <figcaption>Source — down</figcaption>
                     </figure>
                 </div>
                 <figure class="featured-image featured-image--wide">
-                    <img src="./placeholder.svg" alt="Placeholder for third mosaic result">
-                    <figcaption>Third mosaic result</figcaption>
+                    <img src="./images/house_mosaic.jpg" alt="House mosaic result">
+                    <figcaption>House mosaic</figcaption>
+                </figure>
+                <p class="analysis-textbox">But wait, this image doesn't look as clean. In the area where the
+                    two images overlap, there is clear ghosting. It is especially clear with the bushes in the
+                    back, which appear to have doubles. To fix this, we may need to use a more sophisticated image
+                    blending technique between the two images. We can revisit Laplacian Blending, our old friend
+                    from Project 2! This is done by splitting each image into high-pass and low-pass versions and
+                    combining them differently. For the high-pass images, I use a hard border: each pixel comes from
+                    whichever input has the higher weight. For the low-pass images, I still use a weighted average of
+                    the feather weights, but those weights are blurred with the same filter used on the images. Adding
+                    the high-pass and low-pass blends gives the final mosaic.
+                </p>
+                <figure class="featured-image featured-image--wide">
+                    <img src="./images/house_mosaic2.jpg" alt="House mosaic alternate result">
+                    <figcaption>House mosaic (alternate)</figcaption>
                 </figure>
             </div>
         </section>
