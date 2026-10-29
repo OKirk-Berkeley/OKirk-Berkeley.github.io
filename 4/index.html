@@ -40,25 +40,25 @@
         <div class="gallery-rows" id="part-a">
             <p class="analysis-textbox">In this project I stitch photographs into mosaics by recovering
             projective transforms (homographies) between views, warping images into a shared coordinate
-            frame, and blending the overlap. Part A is fully manual: I click correspondences myself.
+            frame, and blending the overlap. Part A is fully manual: I pick correspondences myself.
             Part B will automate that correspondence step.</p>
         </div>
 
         <section class="gallery-section">
             <h2 class="part-heading" id="a-1">A.1 Shoot the Pictures</h2>
             <div class="gallery-rows">
-                <p class="analysis-textbox">I captured overlapping photos with a roughly fixed center of projection,
-                rotating the camera between shots so the motion is approximately projective. I aimed for substantial
+                <p class="analysis-textbox">I captured overlapping photos with a (roughly) fixed center of projection,
+                rotating the camera between shots so the motion is projective. I aimed for substantial
                 overlap (around half the field of view) and took each pair in quick succession so lighting and
                 scene content stayed stable. Below are the image sets used for mosaicing.</p>
 
                 <h3 class="subsection-heading">Set 1: Indoor room</h3>
-                <p class="analysis-textbox">A dorm-room wall panorama. The doors, shelves, and hanging clothes give
+                <p class="analysis-textbox">A panorama of my room. The doors, shelves, and hanging clothes give
                 plenty of distinctive corners for manual correspondences.</p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
                         <img src="./images/room_left.jpg" alt="Room source image, left view">
-                        <figcaption>Room — left view (reference)</figcaption>
+                        <figcaption>Room — left view</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./images/room_right.jpg" alt="Room source image, right view">
@@ -67,17 +67,18 @@
                 </div>
 
                 <h3 class="subsection-heading">Set 2: Outdoor campus</h3>
-                <p class="analysis-textbox">The Botany building and adjacent lawn on campus. Building edges and
-                path lines make good correspondence targets, though parallax from nearby trees can still show up
-                in the stitch.</p>
+                <p class="analysis-textbox">The Valley and Life Sciences building and adjacent lawn on campus. In the automatic 
+                    correspondence part of the project, these images may be tough to work with because of the lack of obvious
+                    corners. Using manual correspondences however, it was easy enough to use the corners of shadows, light posts
+                    and tree tops.</p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
                         <img src="./images/outdoors_left.jpg" alt="Outdoors source image, left view">
-                        <figcaption>Outdoors — left view (reference)</figcaption>
+                        <figcaption>VLSB — left view (reference)</figcaption>
                     </figure>
                     <figure class="gallery-item">
                         <img src="./images/outdoors_right.jpg" alt="Outdoors source image, right view">
-                        <figcaption>Outdoors — right view</figcaption>
+                        <figcaption>VLSB — right view</figcaption>
                     </figure>
                 </div>
 
@@ -179,7 +180,10 @@
                 </div>
                 <p class="analysis-textbox">Let's look at an example on some of the images that are linked via
                 projective transform. For these two images, we can take the following points that appear in
-                both images to define a correspondence.</p>
+                both images to define a correspondence. Note that since there are 8 corresponding points, the above
+                strategy will produce 16 equations in order to solve for only 8 unknowns. As a result, we use the
+                least squares solution, which produces a more stable result than exactly calculating a homography on
+                only 4 correspondences (8 equations).</p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
                         <img src="./images/room_left_with_points.jpg" alt="Room left with correspondence points">
@@ -188,21 +192,107 @@
                         <img src="./images/room_right_with_points.jpg" alt="Room right with correspondence points">
                     </figure>
                 </div>
+
+                <details class="code-box">
+                    <summary>Points</summary>
+                    <pre><code>Left image:
+  1: (542.143,  66.201)
+  2: (766.218,  45.357)
+  3: (549.959, 601.201)
+  4: (768.823, 619.440)
+  5: (620.308, 156.526)
+  6: (722.792, 552.565)
+  7: (751.453, 316.331)
+  8: (508.271, 192.135)
+
+Right image:
+  1: (100.942,  39.278)
+  2: (325.016,  70.544)
+  3: (121.786, 623.782)
+  4: (335.438, 583.831)
+  5: (189.529, 143.498)
+  6: (297.224, 532.589)
+  7: (316.331, 307.646)
+  8: ( 58.385, 168.685)</code></pre>
+                </details>
+
+                <details class="code-box">
+                    <summary>System of equations</summary>
+                    <pre><code>A =
+[[ 100.942,   39.278,    1.000,    0.000,    0.000,    0.000,  -54724.745,  -21294.069],
+ [   0.000,    0.000,    0.000,  100.942,   39.278,    1.000,   -6682.462,   -2600.228],
+ [ 325.016,   70.544,    1.000,    0.000,    0.000,    0.000, -249033.137,  -54051.920],
+ [   0.000,    0.000,    0.000,  325.016,   70.544,    1.000,  -14741.808,   -3199.667],
+ [ 121.786,  623.782,    1.000,    0.000,    0.000,    0.000,  -66977.200, -343055.041],
+ [   0.000,    0.000,    0.000,  121.786,  623.782,    1.000,  -73217.730, -375018.830],
+ [ 335.438,  583.831,    1.000,    0.000,    0.000,    0.000, -257892.707, -448862.861],
+ [   0.000,    0.000,    0.000,  335.438,  583.831,    1.000, -207783.886, -361648.341],
+ [ 189.529,  143.498,    1.000,    0.000,    0.000,    0.000, -117566.576,  -89013.254],
+ [   0.000,    0.000,    0.000,  189.529,  143.498,    1.000,  -29666.246,  -22461.223],
+ [ 297.224,  532.589,    1.000,    0.000,    0.000,    0.000, -214831.210, -384951.386],
+ [   0.000,    0.000,    0.000,  297.224,  532.589,    1.000, -164235.575, -294290.164],
+ [ 316.331,  307.646,    1.000,    0.000,    0.000,    0.000, -237707.981, -231181.564],
+ [   0.000,    0.000,    0.000,  316.331,  307.646,    1.000, -100065.408,  -97318.052],
+ [  58.385,  168.685,    1.000,    0.000,    0.000,    0.000,  -29675.276,  -85737.744],
+ [   0.000,    0.000,    0.000,   58.385,  168.685,    1.000,  -11217.737,  -32410.261]]
+
+b =
+[542.143,  66.201, 766.218,  45.357, 549.959, 601.201, 768.823, 619.440,
+ 620.308, 156.526, 722.792, 552.565, 751.453, 316.331, 508.271, 192.135]
+
+542.143 = (100.942)a + (39.278)b + (1.000)c + (0.000)d + (0.000)e + (0.000)f + (-54724.745)g + (-21294.069)h
+66.201 = (0.000)a + (0.000)b + (0.000)c + (100.942)d + (39.278)e + (1.000)f + (-6682.462)g + (-2600.228)h
+766.218 = (325.016)a + (70.544)b + (1.000)c + (0.000)d + (0.000)e + (0.000)f + (-249033.137)g + (-54051.920)h
+45.357 = (0.000)a + (0.000)b + (0.000)c + (325.016)d + (70.544)e + (1.000)f + (-14741.808)g + (-3199.667)h
+549.959 = (121.786)a + (623.782)b + (1.000)c + (0.000)d + (0.000)e + (0.000)f + (-66977.200)g + (-343055.041)h
+601.201 = (0.000)a + (0.000)b + (0.000)c + (121.786)d + (623.782)e + (1.000)f + (-73217.730)g + (-375018.830)h
+768.823 = (335.438)a + (583.831)b + (1.000)c + (0.000)d + (0.000)e + (0.000)f + (-257892.707)g + (-448862.861)h
+619.440 = (0.000)a + (0.000)b + (0.000)c + (335.438)d + (583.831)e + (1.000)f + (-207783.886)g + (-361648.341)h
+620.308 = (189.529)a + (143.498)b + (1.000)c + (0.000)d + (0.000)e + (0.000)f + (-117566.576)g + (-89013.254)h
+156.526 = (0.000)a + (0.000)b + (0.000)c + (189.529)d + (143.498)e + (1.000)f + (-29666.246)g + (-22461.223)h
+722.792 = (297.224)a + (532.589)b + (1.000)c + (0.000)d + (0.000)e + (0.000)f + (-214831.210)g + (-384951.386)h
+552.565 = (0.000)a + (0.000)b + (0.000)c + (297.224)d + (532.589)e + (1.000)f + (-164235.575)g + (-294290.164)h
+751.453 = (316.331)a + (307.646)b + (1.000)c + (0.000)d + (0.000)e + (0.000)f + (-237707.981)g + (-231181.564)h
+316.331 = (0.000)a + (0.000)b + (0.000)c + (316.331)d + (307.646)e + (1.000)f + (-100065.408)g + (-97318.052)h
+508.271 = (58.385)a + (168.685)b + (1.000)c + (0.000)d + (0.000)e + (0.000)f + (-29675.276)g + (-85737.744)h
+192.135 = (0.000)a + (0.000)b + (0.000)c + (58.385)d + (168.685)e + (1.000)f + (-11217.737)g + (-32410.261)h</code></pre>
+                </details>
+
+                <details class="code-box">
+                    <summary>H</summary>
+                    <pre><code>H =
+[[ 0.344,  0.014, 465.808],
+ [-0.243,  0.863,  53.583],
+ [-0.001,  0.000,   1.000]]</code></pre>
+                </details>
             </div>
         </section>
 
         <section class="gallery-section">
             <h2 class="part-heading" id="a-3">A.3 Warp the Images</h2>
             <div class="gallery-rows">
-                <p class="analysis-textbox">Warping uses inverse mapping: for every destination pixel, apply
-                H<sup>−1</sup> to find the corresponding source location, then interpolate. This avoids holes
-                that forward-warping leaves. I estimate the output canvas by transforming the four source
-                corners through H and taking their axis-aligned bounding box. I implemented two interpolators
-                from scratch — nearest neighbor (fast, blockier edges) and bilinear (smoother, preferred for
-                mosaics). Before mosaicing, I tested the pipeline by rectifying known rectangles: click the
-                four corners of a planar object, then map them to a rectangle. Results for both interpolators
-                are shown below.</p>
-
+                <p class="analysis-textbox">To warp an image using H, we multiply every pixel by H to find its
+                corresponding pixel in the output. Since these output destinations sometimes do not fall cleanly
+                into new pixel destinations (e.g. some input pixels may get mapped between two pixels or two inputs
+                may get mapped to the same output destination), this can sometimes produce holes in the output where
+                no input pixel was mapped to. To counter this, we use inverse mapping. This means that for every
+                destination pixel, we apply H<sup>−1</sup> to find the corresponding source location, then interpolate.
+                We can estimate the size and shape of the output canvas by first forward mapping the four source
+                corners through H, then inverse mapping every pixel within these output corners.</p>
+                <p class="analysis-textbox">When output pixels don't map cleanly to input pixels, interpolation is needed. For this
+                    project, I implemented two interpolation techniques. The first is nearest-neighbor interpolation, where when an
+                    output pixel was mapped to between multiple input pixels, it recieves the value of the closest pixel. Bilinear
+                    interpolation, on the other hand, recieves a weighted average of each of the pixels its input landed between,
+                    weighted by how close it was to each.
+                </p>
+                <p class="analysis-textbox">Here, I use inverse mapping with both nearest-neighbor and bilinear interpolation
+                    to rectify images. Image rectification is when homographies are used to transform input images onto a given
+                    plane. To show how powerful this is, I've rectified images with known square or rectangular objects and transformed
+                    them onto a plane where the camera is looking orthogonally to them. To do this, I computed H using the four
+                    corners of the rectangular object (selected by hand) as input points and four hard coded rectangular points as
+                    the output points (x' and y'). The first two images have been cropped to just show the rectified portion while the last
+                    is shown in its entirety to show how this process distorts the rest of the image.
+                </p>
                 <h3 class="subsection-heading">Hallway</h3>
                 <div class="image-gallery image-gallery--thirds">
                     <figure class="gallery-item">
@@ -253,19 +343,22 @@
 
                 <p class="analysis-textbox">Nearest neighbor is cheaper but introduces jagged artifacts under
                 strong warps. Bilinear averages the four surrounding source pixels, which softens those edges
-                and generally looks better for both rectification and mosaicing, at a modest extra cost.</p>
+                and generally looks better for both rectification and mosaicing, at an extra cost. Since the only
+                extra cost to bilinear interpolation comes in the interpolation phase and does not affect the more expensive
+                actual computing of H, this is generally a modest extra cost.</p>
             </div>
         </section>
 
         <section class="gallery-section">
             <h2 class="part-heading" id="a-4">A.4 Blend Images into a Mosaic</h2>
             <div class="gallery-rows">
-                <p class="analysis-textbox">To build a mosaic I leave one image as the reference (identity
-                homography) and warp the others into that frame. All images are warped onto a shared canvas
-                sized to the union of their projected bounding boxes. Instead of overwriting, I blend with
-                distance-to-edge feathering: each source pixel gets a weight equal to its distance to the
-                nearest image border (normalized to [0, 1]). Warped weights travel with the image, and the
-                final pixel is a weighted average of all contributions.</p>
+                <p class="analysis-textbox">To build a mosaic I leave one image as the reference and warp the other 
+                to fit it. All images are warped onto a shared canvas sized to the union of their projected bounding
+                boxes. To reduce edge artifacts like abrupt cutoffs or ghosting at the point where images meet, I give
+                each pixel in each image a weight. The weight is 1 at the center of each image and linearly decreases to
+                zero by the edges. The weights of pixels in warped images come from the weights of their corresponding
+                input pixels. In the final mosaic, each pixel is a weighted average of the corresponding pixels from the
+                two images (one of which is already warped to fit the other).</p>
 
                 <h3 class="subsection-heading">Mosaic 1: Indoor room</h3>
                 <div class="image-gallery comparison-gallery">
