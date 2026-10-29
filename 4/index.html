@@ -5,13 +5,321 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project 4</title>
     <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });"></script>
 </head>
 <body>
-    <div class="placeholder-page">
-        <div class="icon">🚧</div>
-        <h1>Oops, this project has not been implemented yet!</h1>
-        <p>Project 4 is still under construction. Check back soon!</p>
+    <div class="container project-page project-page--wide">
+        <header>
+            <h1>Project 4</h1>
+            <p>Part A: Image Warping and Mosaicing</p>
+        </header>
+
+        <nav class="toc" aria-label="Table of contents">
+            <h2>Contents</h2>
+            <ol class="toc__parts">
+                <li>
+                    <a href="#part-a">Part A: Image Warping and Mosaicing</a>
+                    <ol>
+                        <li><a href="#a-1">A.1 Shoot the Pictures</a></li>
+                        <li><a href="#a-2">A.2 Recover Homographies</a></li>
+                        <li><a href="#a-3">A.3 Warp the Images</a></li>
+                        <li><a href="#a-4">A.4 Blend Images into a Mosaic</a></li>
+                    </ol>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="gallery-rows" id="part-a">
+            <p class="analysis-textbox">In this project I stitch photographs into mosaics by recovering
+            projective transforms (homographies) between views, warping images into a shared coordinate
+            frame, and blending the overlap. Part A is fully manual: I click correspondences myself.
+            Part B will automate that correspondence step.</p>
+        </div>
+
+        <section class="gallery-section">
+            <h2 class="part-heading" id="a-1">A.1 Shoot the Pictures</h2>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">I captured overlapping photos with a roughly fixed center of projection,
+                rotating the camera between shots so the motion is approximately projective. I aimed for substantial
+                overlap (around half the field of view) and took each pair in quick succession so lighting and
+                scene content stayed stable. Below are the image sets used for mosaicing.</p>
+
+                <h3 class="subsection-heading">Set 1: Indoor room</h3>
+                <p class="analysis-textbox">A dorm-room wall panorama. The doors, shelves, and hanging clothes give
+                plenty of distinctive corners for manual correspondences.</p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/room_left.jpg" alt="Room source image, left view">
+                        <figcaption>Room — left view (reference)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/room_right.jpg" alt="Room source image, right view">
+                        <figcaption>Room — right view</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="subsection-heading">Set 2: Outdoor campus</h3>
+                <p class="analysis-textbox">The Botany building and adjacent lawn on campus. Building edges and
+                path lines make good correspondence targets, though parallax from nearby trees can still show up
+                in the stitch.</p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/outdoors_left.jpg" alt="Outdoors source image, left view">
+                        <figcaption>Outdoors — left view (reference)</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/outdoors_right.jpg" alt="Outdoors source image, right view">
+                        <figcaption>Outdoors — right view</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="subsection-heading">Set 3</h3>
+                <p class="analysis-textbox">Third mosaic source pair.</p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./placeholder.svg" alt="Placeholder for third pair, left view">
+                        <figcaption>Set 3 — left view</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./placeholder.svg" alt="Placeholder for third pair, right view">
+                        <figcaption>Set 3 — right view</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery-section">
+            <h2 class="part-heading" id="a-2">A.2 Recover Homographies</h2>
+            <div class="gallery-rows">
+                <div class="analysis-textbox">
+                    <p>To find our homography matrix, we are searching for some $3 \times 3$ matrix $H$ where every
+                    input point maps to its corresponding output point:</p>
+                    $$
+                    \begin{bmatrix} w x' \\ w y' \\ w \end{bmatrix}
+                    =
+                    H
+                    \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}
+                    $$
+                    <p>If $H$ looks like</p>
+                    $$
+                    H =
+                    \begin{bmatrix}
+                    a & b & c \\
+                    d & e & f \\
+                    g & h & 1
+                    \end{bmatrix}
+                    $$
+                    <p>we have the system of equations</p>
+                    $$
+                    \begin{aligned}
+                    w x' &= a x + b y + c \\
+                    w y' &= d x + e y + f \\
+                    w &= g x + h y + 1
+                    \end{aligned}
+                    $$
+                    <p>or, equivalently,</p>
+                    $$
+                    \begin{aligned}
+                    x' &= \frac{a x + b y + c}{g x + h y + 1} \\[0.5em]
+                    y' &= \frac{d x + e y + f}{g x + h y + 1}
+                    \end{aligned}
+                    $$
+                    <p>With some arithmetic, we can rewrite this as</p>
+                    $$
+                    \begin{aligned}
+                    x' &= a x + b y + c - g x x' - h y x' \\
+                    y' &= d x + e y + f - g x y' - h y y'
+                    \end{aligned}
+                    $$
+                    <p>For each $x$-coordinate correspondence, we can then solve</p>
+                    $$
+                    \begin{bmatrix}
+                    x & y & 1 & 0 & 0 & 0 & -x x' & -y x'
+                    \end{bmatrix}
+                    \begin{bmatrix}
+                    a \\ b \\ c \\ d \\ e \\ f \\ g \\ h
+                    \end{bmatrix}
+                    = x'
+                    $$
+                    <p>and for each $y$-coordinate correspondence</p>
+                    $$
+                    \begin{bmatrix}
+                    0 & 0 & 0 & x & y & 1 & -x y' & -y y'
+                    \end{bmatrix}
+                    \begin{bmatrix}
+                    a \\ b \\ c \\ d \\ e \\ f \\ g \\ h
+                    \end{bmatrix}
+                    = y'
+                    $$
+                    <p>For multiple points we can then solve the matrix equation</p>
+                    $$
+                    \begin{bmatrix}
+                    x_1 & y_1 & 1 & 0 & 0 & 0 & -x_1 x'_1 & -y_1 x'_1 \\
+                    0 & 0 & 0 & x_1 & y_1 & 1 & -x_1 y'_1 & -y_1 y'_1 \\
+                    \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+                    x_n & y_n & 1 & 0 & 0 & 0 & -x_n x'_n & -y_n x'_n \\
+                    0 & 0 & 0 & x_n & y_n & 1 & -x_n y'_n & -y_n y'_n
+                    \end{bmatrix}
+                    \begin{bmatrix}
+                    a \\ b \\ c \\ d \\ e \\ f \\ g \\ h
+                    \end{bmatrix}
+                    =
+                    \begin{bmatrix}
+                    x'_1 \\ y'_1 \\ \vdots \\ x'_n \\ y'_n
+                    \end{bmatrix}
+                    $$
+                </div>
+                <p class="analysis-textbox">Let's look at an example on some of the images that are linked via
+                projective transform. For these two images, we can take the following points that appear in
+                both images to define a correspondence.</p>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/room_left_with_points.jpg" alt="Room left with correspondence points">
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/room_right_with_points.jpg" alt="Room right with correspondence points">
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery-section">
+            <h2 class="part-heading" id="a-3">A.3 Warp the Images</h2>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">Warping uses inverse mapping: for every destination pixel, apply
+                H<sup>−1</sup> to find the corresponding source location, then interpolate. This avoids holes
+                that forward-warping leaves. I estimate the output canvas by transforming the four source
+                corners through H and taking their axis-aligned bounding box. I implemented two interpolators
+                from scratch — nearest neighbor (fast, blockier edges) and bilinear (smoother, preferred for
+                mosaics). Before mosaicing, I tested the pipeline by rectifying known rectangles: click the
+                four corners of a planar object, then map them to a rectangle. Results for both interpolators
+                are shown below.</p>
+
+                <h3 class="subsection-heading">Hallway</h3>
+                <div class="image-gallery image-gallery--thirds">
+                    <figure class="gallery-item">
+                        <img src="./images/hallway.jpg" alt="Hallway original">
+                        <figcaption>Original</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/rectified_hallway_nn.jpg" alt="Hallway nearest-neighbor rectification">
+                        <figcaption>Nearest neighbor</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/rectified_hallway_bilinear.jpg" alt="Hallway bilinear rectification">
+                        <figcaption>Bilinear</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="subsection-heading">Mona Lisa</h3>
+                <div class="image-gallery image-gallery--thirds">
+                    <figure class="gallery-item">
+                        <img src="./images/mona_lisa.jpg" alt="Mona Lisa original">
+                        <figcaption>Original</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/rectified_mona_lisa_nn.jpg" alt="Mona Lisa nearest-neighbor rectification">
+                        <figcaption>Nearest neighbor</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/rectified_mona_lisa_bilinear.jpg" alt="Mona Lisa bilinear rectification">
+                        <figcaption>Bilinear</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="subsection-heading">Building</h3>
+                <div class="image-gallery image-gallery--thirds">
+                    <figure class="gallery-item">
+                        <img src="./images/building.jpg" alt="Building original">
+                        <figcaption>Original</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/rectified_building_nn.jpg" alt="Building nearest-neighbor rectification">
+                        <figcaption>Nearest neighbor</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/rectified_building_bilinear.jpg" alt="Building bilinear rectification">
+                        <figcaption>Bilinear</figcaption>
+                    </figure>
+                </div>
+
+                <p class="analysis-textbox">Nearest neighbor is cheaper but introduces jagged artifacts under
+                strong warps. Bilinear averages the four surrounding source pixels, which softens those edges
+                and generally looks better for both rectification and mosaicing, at a modest extra cost.</p>
+            </div>
+        </section>
+
+        <section class="gallery-section">
+            <h2 class="part-heading" id="a-4">A.4 Blend Images into a Mosaic</h2>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">To build a mosaic I leave one image as the reference (identity
+                homography) and warp the others into that frame. All images are warped onto a shared canvas
+                sized to the union of their projected bounding boxes. Instead of overwriting, I blend with
+                distance-to-edge feathering: each source pixel gets a weight equal to its distance to the
+                nearest image border (normalized to [0, 1]). Warped weights travel with the image, and the
+                final pixel is a weighted average of all contributions.</p>
+
+                <h3 class="subsection-heading">Mosaic 1: Indoor room</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/room_left.jpg" alt="Room left source">
+                        <figcaption>Source — left</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/room_right.jpg" alt="Room right source">
+                        <figcaption>Source — right</figcaption>
+                    </figure>
+                </div>
+                <figure class="featured-image featured-image--wide">
+                    <img src="./images/room_mosaic.jpg" alt="Room mosaic result">
+                    <figcaption>Room mosaic (bilinear warp + distance feathering)</figcaption>
+                </figure>
+
+                <h3 class="subsection-heading">Mosaic 2: Outdoor campus</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/outdoors_left.jpg" alt="Outdoors left source">
+                        <figcaption>Source — left</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/outdoors_right.jpg" alt="Outdoors right source">
+                        <figcaption>Source — right</figcaption>
+                    </figure>
+                </div>
+                <figure class="featured-image featured-image--wide">
+                    <img src="./images/outdoors_mosaic.jpg" alt="Outdoors mosaic result">
+                    <figcaption>Outdoors mosaic (bilinear warp + distance feathering)</figcaption>
+                </figure>
+
+                <h3 class="subsection-heading">Mosaic 3</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./placeholder.svg" alt="Placeholder for third mosaic source A">
+                        <figcaption>Source A</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./placeholder.svg" alt="Placeholder for third mosaic source B">
+                        <figcaption>Source B</figcaption>
+                    </figure>
+                </div>
+                <figure class="featured-image featured-image--wide">
+                    <img src="./placeholder.svg" alt="Placeholder for third mosaic result">
+                    <figcaption>Third mosaic result</figcaption>
+                </figure>
+            </div>
+        </section>
+
         <a class="back-link" href="../index.html">← Back to Portfolio</a>
     </div>
+    <script src="../lightbox.js"></script>
+    <script src="../size-slider.js"></script>
 </body>
 </html>
