@@ -446,6 +446,11 @@ html {
     border-radius: 6px;
 }
 
+.pixelated {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
 .image-gallery--fifths .gallery-item figcaption {
     margin-top: 0.35rem;
     font-size: 0.8rem;

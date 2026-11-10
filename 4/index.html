@@ -19,7 +19,7 @@
     <div class="container project-page project-page--wide">
         <header>
             <h1>Project 4</h1>
-            <p>Part A: Image Warping and Mosaicing</p>
+            <p>Part A: Image Warping and Mosaicing &nbsp;|&nbsp; Part B: Feature Matching for Autostitching</p>
         </header>
 
         <nav class="toc" aria-label="Table of contents">
@@ -32,6 +32,15 @@
                         <li><a href="#a-2">A.2 Recover Homographies</a></li>
                         <li><a href="#a-3">A.3 Warp the Images</a></li>
                         <li><a href="#a-4">A.4 Blend Images into a Mosaic</a></li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="#part-b">Part B: Feature Matching for Autostitching</a>
+                    <ol>
+                        <li><a href="#b-1">B.1 Harris Corner Detection</a></li>
+                        <li><a href="#b-2">B.2 Feature Descriptor Extraction</a></li>
+                        <li><a href="#b-3">B.3 Feature Matching</a></li>
+                        <li><a href="#b-4">B.4 RANSAC for Robust Homography</a></li>
                     </ol>
                 </li>
             </ol>
@@ -422,6 +431,221 @@ b =
                 <figure class="featured-image featured-image--wide">
                     <img src="./images/house_mosaic2.jpg" alt="House mosaic alternate result">
                     <figcaption>House mosaic (bilinear warp + Laplacian Blending)</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <div class="gallery-rows" id="part-b">
+            <h2 class="part-heading">Part B: Feature Matching for Autostitching</h2>
+            <p class="analysis-textbox">Part B replaces the hand-picked correspondences from Part A with an
+            automatic pipeline based on Brown et al.'s Multi-Scale Oriented Patches paper (with several
+            simplifications). I detect Harris corners, suppress them with ANMS, extract normalized 8×8
+            descriptors, match them with Lowe's ratio test, and estimate a robust homography with 4-point
+            RANSAC before warping and blending as in Part A.</p>
+        </div>
+
+        <section class="gallery-section">
+            <h2 class="part-heading" id="b-1">B.1 Harris Corner Detection</h2>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">I run a single-scale Harris interest point detector on each image
+                (no multi-scale or sub-pixel refinement). The raw detector returns a dense set of corners.
+                Adaptive Non-Maximal Suppression (ANMS) then keeps a spatially well-distributed subset of the
+                strongest corners so descriptors are not clustered in textured regions.</p>
+
+                <h3 class="subsection-heading">All Harris corners</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/room_left_all_corners.jpg" alt="Room left with all Harris corners">
+                        <figcaption>Room left — all Harris corners</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/room_right_all_corners.jpg" alt="Room right with all Harris corners">
+                        <figcaption>Room right — all Harris corners</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="subsection-heading">After ANMS</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/room_left_anms_corners.jpg" alt="Room left with ANMS corners">
+                        <figcaption>Room left — ANMS corners</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/room_right_anms_corners.jpg" alt="Room right with ANMS corners">
+                        <figcaption>Room right — ANMS corners</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery-section">
+            <h2 class="part-heading" id="b-2">B.2 Feature Descriptor Extraction</h2>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">Around each retained corner I sample an axis-aligned 8×8 descriptor
+                from a larger 40×40 window (so the patch is effectively blurred), then bias/gain-normalize it.
+                Below are five example descriptors from the room images (features 0, 50, 100, 150, and 200).</p>
+                <div class="image-gallery image-gallery--fifths">
+                    <figure class="gallery-item">
+                        <img class="pixelated" src="./images/feature0.jpg" alt="Feature descriptor 0">
+                        <figcaption>Feature 0</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img class="pixelated" src="./images/feature50.jpg" alt="Feature descriptor 50">
+                        <figcaption>Feature 50</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img class="pixelated" src="./images/feature100.jpg" alt="Feature descriptor 100">
+                        <figcaption>Feature 100</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img class="pixelated" src="./images/feature150.jpg" alt="Feature descriptor 150">
+                        <figcaption>Feature 150</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img class="pixelated" src="./images/feature200.jpg" alt="Feature descriptor 200">
+                        <figcaption>Feature 200</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery-section">
+            <h2 class="part-heading" id="b-3">B.3 Feature Matching</h2>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">I match descriptors between image pairs using Lowe's ratio test:
+                a putative match is kept only when the distance to the nearest neighbor is sufficiently smaller
+                than the distance to the second-nearest neighbor. Each figure below shows a matched descriptor
+                pair and the corresponding locations in the left and right room images.</p>
+                <div class="image-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/feature_match0.jpg" alt="Feature match 0">
+                        <figcaption>Match 0</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/feature_match1.jpg" alt="Feature match 1">
+                        <figcaption>Match 1</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/feature_match2.jpg" alt="Feature match 2">
+                        <figcaption>Match 2</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/feature_match3.jpg" alt="Feature match 3">
+                        <figcaption>Match 3</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/feature_match4.jpg" alt="Feature match 4">
+                        <figcaption>Match 4</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery-section">
+            <h2 class="part-heading" id="b-4">B.4 RANSAC for Robust Homography</h2>
+            <div class="gallery-rows">
+                <p class="analysis-textbox">Feature matches still contain outliers, so I estimate the
+                homography with 4-point RANSAC: repeatedly sample four matches, fit H, count inliers under a
+                reprojection threshold, and refit on the largest inlier set. Warping and blending then reuse
+                the Part A pipeline. Below I compare manual (Part A) and automatic (Part B) mosaics on the
+                same three scenes, then show two additional automatic mosaics that were not in Part A.</p>
+
+                <h3 class="subsection-heading">Indoor room — manual vs automatic</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/room_left.jpg" alt="Room left source">
+                        <figcaption>Source — left</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/room_right.jpg" alt="Room right source">
+                        <figcaption>Source — right</figcaption>
+                    </figure>
+                </div>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/room_mosaic.jpg" alt="Room mosaic from Part A">
+                        <figcaption>Correspondences: manual, Blend: distance feathering</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/room_mosaic_B.jpg" alt="Room mosaic from Part B">
+                        <figcaption>Correspondences: automatic, Blend: Laplacian</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="subsection-heading">Outdoor campus — manual vs automatic</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/outdoors_left.jpg" alt="Outdoors left source">
+                        <figcaption>Source — left</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/outdoors_right.jpg" alt="Outdoors right source">
+                        <figcaption>Source — right</figcaption>
+                    </figure>
+                </div>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/outdoors_mosaic.jpg" alt="Outdoors mosaic from Part A">
+                        <figcaption>Correspondences: manual, Blend: distance feathering</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/outdoors_mosaic_B.jpg" alt="Outdoors mosaic from Part B">
+                        <figcaption>Correspondences: automatic, Blend: Laplacian</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="subsection-heading">House — manual vs automatic</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/house_up.jpg" alt="House up source">
+                        <figcaption>Source — up</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/house_down.jpg" alt="House down source">
+                        <figcaption>Source — down</figcaption>
+                    </figure>
+                </div>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/house_mosaic2.jpg" alt="House mosaic from Part A">
+                        <figcaption>Correspondences: manual, Blend: Laplacian</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/house_mosaic_B.jpg" alt="House mosaic from Part B">
+                        <figcaption>Correspondences: automatic, Blend: Laplacian</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="subsection-heading">Hill — automatic only</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/hill1.jpg" alt="Hill source image 1">
+                        <figcaption>Source — view 1</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/hill2.jpg" alt="Hill source image 2">
+                        <figcaption>Source — view 2</figcaption>
+                    </figure>
+                </div>
+                <figure class="featured-image featured-image--wide">
+                    <img src="./images/hill_mosaic_B.jpg" alt="Hill mosaic from Part B">
+                    <figcaption>Correspondences: automatic, Blend: distance feathering</figcaption>
+                </figure>
+
+                <h3 class="subsection-heading">Courtyard — automatic only</h3>
+                <div class="image-gallery comparison-gallery">
+                    <figure class="gallery-item">
+                        <img src="./images/courtyard1.jpg" alt="Courtyard source image 1">
+                        <figcaption>Source — view 1</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="./images/courtyard2.jpg" alt="Courtyard source image 2">
+                        <figcaption>Source — view 2</figcaption>
+                    </figure>
+                </div>
+                <figure class="featured-image featured-image--wide">
+                    <img src="./images/courtyard_mosaic_B.jpg" alt="Courtyard mosaic from Part B">
+                    <figcaption>Correspondences: automatic, Blend: Laplacian</figcaption>
                 </figure>
             </div>
         </section>
