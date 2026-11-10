@@ -470,6 +470,27 @@ b =
                         <figcaption>Room right — all Harris corners</figcaption>
                     </figure>
                 </div>
+
+                <details class="code-box text-dropdown">
+                    <summary>Why are there so many?</summary>
+                    <div class="text-dropdown-body">
+                        <p>These examples are computed by finding pixels that respond the strongest to the Harris
+                            function within a 1-pixel radius. This allows computed corners to be right next to each
+                            other, which is OK because the next step, Adaptive Non-Maximal Supression (ANMS), will
+                            reduce the number of corners we have. If we were not using ANMS, we could ensure corners
+                            were more spread out by selecting pixels that have the strongest Harris response within a
+                            10-pixel radius. This is what that set of corners would look like:</p>
+                        <div class="image-gallery comparison-gallery">
+                            <figure class="gallery-item">
+                                <img src="./images/room_left_harris_corners_spaced.jpg" alt="Room left with spaced Harris corners">
+                            </figure>
+                            <figure class="gallery-item">
+                                <img src="./images/room_right_harris_corners_spaced.jpg" alt="Room right with spaced Harris corners">
+                            </figure>
+                        </div>
+                    </div>
+                </details>
+
                 <p class="analysis-textbox">We want to reduce the number of corners to a manageable number, keeping
                     the pixels with the strongest corner response without letting them all cluster around the densest
                     part of the image. To do this, we order our corners by the distance from each corner to the nearest
