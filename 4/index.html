@@ -442,11 +442,11 @@ b =
             <p class="analysis-textbox">Part B replaces the hand-picked correspondences from Part A with an
             automatic pipeline. This pipeline attempts to find corresponding corners in both images by first
             using Harris corner detection to select all corners in each image. It then uses Adaptive
-            Non-Maximal Surpression to reduce the number of corners in each image to a spatially distributed
+            Non-Maximal Suppression to reduce the number of corners in each image to a spatially distributed
             set that responded strongest to the Harris corner detection function. Features are extracted from
-            each point and points are attempted to be matched across the images by finding the correspondence
-            of their features. Finally, a homography is computed from these matching points and the images
-            are warped as in Part A. Each of the steps is decribed in more detail below.</p>
+            each point, and we attempt to match points across the images by finding correspondences
+            between their features. Finally, a homography is computed from these matching points and the images
+            are warped as in Part A. Each of the steps is described in more detail below.</p>
         </div>
 
         <section class="gallery-section">
@@ -454,9 +454,9 @@ b =
             <div class="gallery-rows">
                 <p class="analysis-textbox">Harris corner detection finds the points in an image where the
                     absolute value of the derivative of the image is high in many directions. This algorithm
-                    capitalizes on the fact that while edges have a strong derivative response in the direction
-                    of the edge, corners must have that strong response in the direction of each edge making up
-                    that corner. The Harris corner detection algorithm uses this to assign a 'corner strngeth' to
+                    capitalizes on the fact that while edges have a strong derivative response perpendicular to
+                    the edge, corners must have that strong response perpendicular to the direction of each edge making up
+                    that corner. The Harris corner detection algorithm uses this to assign a 'corner strength' to
                     each pixel. Below are all the corners this algorithm identified in my two input images.
                 </p>
                 <h3 class="subsection-heading">All Harris corners</h3>
@@ -470,11 +470,11 @@ b =
                         <figcaption>Room right — all Harris corners</figcaption>
                     </figure>
                 </div>
-                <p class="analysis-textbox">We want to reduce the number of corners to a managable number, keeping
-                    the pixels with the strongest corner response without letting them all cluster around the denset
+                <p class="analysis-textbox">We want to reduce the number of corners to a manageable number, keeping
+                    the pixels with the strongest corner response without letting them all cluster around the densest
                     part of the image. To do this, we order our corners by the distance from each corner to the nearest
-                    point that is signifigantly stronger than it. By selecting the first <i>n</i> points from this list,
-                    we ensure that both the strongest points and the points that are far from each other, creating a nice
+                    point that is significantly stronger than it. By selecting the first <i>n</i> points from this list,
+                    we keep both the strongest points and points that are far from each other, creating a nice
                     spatial distribution over our image. The results of this process using n=250 are shown below.
                 </p>
                 <h3 class="subsection-heading">After ANMS</h3>
@@ -496,9 +496,9 @@ b =
             <div class="gallery-rows">
                 <p class="analysis-textbox">We can then create a feature for each point that can be compared to the features
                     of points in the other image. If two features match, the points likely correspond to the same object.
-                    To construct a feature, we sample an 8x8 swath from the 40x40 pixel area surrounding the image. This
-                    captures information from the whole 40x40 pixel region while downsampling by only sampling 8x8 pixels
-                    in order to reduce feature size and prevent aliasing.
+                    To construct a feature, we sample an 8x8 swath from the 40x40 pixel area surrounding the point. We then bias
+                    and gain normalize the captured 8x8 patch. This captures information from the whole 40x40 pixel region while
+                    downsampling to only 8x8 pixels in order to reduce feature size.
                 </p>
                 <div class="image-gallery image-gallery--fifths">
                     <figure class="gallery-item">
@@ -531,10 +531,10 @@ b =
                 <p class="analysis-textbox">Each feature in one image is then compared to every feature in
                     the other using L2 distance. Not every point will have a perfect correspondence in the other image's
                     set of points, so we must select which features are considered matching. Since we expect a feature
-                    to be substantially closer to its true match than any other feature in the other image, we can make
-                    selection if a feature's match is valud based on how much smaller the distance between its best match
-                    in the other image is than its second best match. A handful of corresponding points are shown below
-                    as well as the features used to match them.
+                    to be substantially closer to its true match than any other feature in the other image, we can decide
+                    whether a feature's match is valid based on how much smaller the distance to its best match
+                    in the other image is than the distance to its second-best match. A handful of corresponding points
+                    are shown below, as well as the features used to match them.
                 </p>
                 <div class="image-gallery">
                     <figure class="gallery-item">
@@ -565,12 +565,12 @@ b =
             <h2 class="part-heading" id="b-4">B.4 RANSAC for Robust Homography</h2>
             <div class="gallery-rows">
                 <p class="analysis-textbox">Finally, we're ready to compute the homography. Since our remaining
-                    points may still have faulty correspondences, we use Random Sampling Concensus (RANSAC).
+                    points may still have faulty correspondences, we use Random Sample Consensus (RANSAC).
                     First, we randomly select 4 correspondences and compute a homography using them. We then
-                    determine how many other correspondences are predicted using this homography, called inliers.
-                    After doing this many times, we select the largest set of inliers over our run. We compute
+                    determine how many other correspondences are consistent with this homography; these are called inliers.
+                    After doing this many times, we select the largest set of inliers over our runs. We compute
                     our final homography by performing least squares regression over all these inliers, as described
-                    in part A. The final results of this process are shown below!
+                    in Part A. The final results of this process are shown below!
                 </p>
                 <h3 class="subsection-heading">Indoor room — manual vs automatic</h3>
                 <p class="analysis-textbox">Here, the objects in the room provide numerous corners for correspondences.
@@ -599,8 +599,8 @@ b =
 
                 <h3 class="subsection-heading">Outdoor campus — manual vs automatic</h3>
                 <p class="analysis-textbox">As predicted above, this image set is tough for finding automatic correspondences.
-                    The hills and sky, which take up the vast majority of the image, don't provide many corners for the algotihm
-                    to lock on to. Still, the automatic algorithm was clearly able to generate a homography that mostly stitches
+                    The hills and sky, which take up the vast majority of the image, don't provide many corners for the algorithm
+                    to lock onto. Still, the automatic algorithm was clearly able to generate a homography that mostly stitches
                     the images.
                 </p>
                 <div class="image-gallery comparison-gallery">
@@ -652,8 +652,8 @@ b =
                 <h3 class="subsection-heading">Hill — automatic only</h3>
                 <p class="analysis-textbox">This mosaic was not included in Part A but is included here for fun. The mosaic
                     computed here is clean except for the woman at the center of the photo. This doubling is a result of
-                    her moving between when the fist source image was taken and when the second was, not a result of the image
-                    blending process. 
+                    her moving between when the first source image was taken and when the second was, not a result of the image
+                    blending process.
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
@@ -672,7 +672,7 @@ b =
 
                 <h3 class="subsection-heading">Courtyard — automatic only</h3>
                 <p class="analysis-textbox">This mosaic was also not included in Part A. This is another example of the
-                    automatic mosaic process producing a clean verticle mosaic.
+                    automatic mosaic process producing a clean vertical mosaic.
                 </p>
                 <div class="image-gallery comparison-gallery">
                     <figure class="gallery-item">
